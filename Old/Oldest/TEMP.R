@@ -1,0 +1,1085 @@
+######################
+#### READ IN DATA ####
+######################
+
+subjData<-readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder_Volume/subjectData/n1359_JLF_subjData.rds")
+
+#########################################
+#### MAKE DIAGNOSIS FACTOR VARIABLES ####
+#########################################
+
+##Make variables where 1 = diagnosis; calculates means, sds, percentage of females, percentage of White, and Ns for all diagnoses. 
+
+#ADHD
+subjData$Add<-NA
+subjData$Add[which(subjData$goassessSmryAdd==4)]<-1
+numAdd<-sum(subjData$Add, na.rm=TRUE)
+ageAddMean<-mean(subjData$age[which(subjData$Add==1)],na.rm=T)
+ageAddSd<-sd(subjData$age[which(subjData$Add==1)],na.rm=T)
+femAdd<-length(which(subjData$sex=="female" & subjData$Add==1))/numAdd
+whiteAdd<-(length(which(subjData$race==1 & subjData$Add==1)))/numAdd
+meduAddMean<-mean(subjData$meduCnbGo1[which(subjData$Add==1)],na.rm=T)
+meduAddSd<-sd(subjData$meduCnbGo1[which(subjData$Add==1)],na.rm=T)
+
+#Agoraphobia
+subjData$Agr<-NA
+subjData$Agr[which(subjData$goassessSmryAgr==4)]<-1
+numAgr<-sum(subjData$Agr, na.rm=TRUE)
+ageAgrMean<-mean(subjData$age[which(subjData$Agr==1)],na.rm=T)
+ageAgrSd<-sd(subjData$age[which(subjData$Agr==1)],na.rm=T)
+femAgr<-length(which(subjData$sex=="female" & subjData$Agr==1))/numAgr
+whiteAgr<-(length(which(subjData$race==1 & subjData$Agr==1)))/numAgr
+meduAgrMean<-mean(subjData$meduCnbGo1[which(subjData$Agr==1)],na.rm=T)
+meduAgrSd<-sd(subjData$meduCnbGo1[which(subjData$Agr==1)],na.rm=T)
+
+#Anorexia
+subjData$Ano<-NA
+subjData$Ano[which(subjData$goassessSmryAno==4)]<-1
+numAno<-sum(subjData$Ano, na.rm=TRUE)
+ageAnoMean<-mean(subjData$age[which(subjData$Ano==1)],na.rm=T)
+ageAnoSd<-sd(subjData$age[which(subjData$Ano==1)],na.rm=T)
+femAno<-length(which(subjData$sex=="female" & subjData$Ano==1))/numAno
+whiteAno<-(length(which(subjData$race==1 & subjData$Ano==1)))/numAno
+meduAnoMean<-mean(subjData$meduCnbGo1[which(subjData$Ano==1)],na.rm=T)
+meduAnoSd<-sd(subjData$meduCnbGo1[which(subjData$Ano==1)],na.rm=T)
+
+#Bulimia
+subjData$Bul<-NA
+subjData$Bul[which(subjData$goassessSmryBul==4)]<-1
+numBul<-sum(subjData$Bul, na.rm=TRUE)
+ageBulMean<-mean(subjData$age[which(subjData$Bul==1)],na.rm=T)
+ageBulSd<-sd(subjData$age[which(subjData$Bul==1)],na.rm=T)
+femBul<-length(which(subjData$sex=="female" & subjData$Bul==1))/numBul
+whiteBul<-(length(which(subjData$race==1 & subjData$Bul==1)))/numBul
+meduBulMean<-mean(subjData$meduCnbGo1[which(subjData$Bul==1)],na.rm=T)
+meduBulSd<-sd(subjData$meduCnbGo1[which(subjData$Bul==1)],na.rm=T)
+
+#Conduct Disorder
+subjData$Con<-NA
+subjData$Con[which(subjData$goassessSmryCon==4)]<-1
+numCon<-sum(subjData$Con, na.rm=TRUE)
+ageConMean<-mean(subjData$age[which(subjData$Con==1)],na.rm=T)
+ageConSd<-sd(subjData$age[which(subjData$Con==1)],na.rm=T)
+femCon<-length(which(subjData$sex=="female" & subjData$Con==1))/numCon
+whiteCon<-(length(which(subjData$race==1 & subjData$Con==1)))/numCon
+meduConMean<-mean(subjData$meduCnbGo1[which(subjData$Con==1)],na.rm=T)
+meduConSd<-sd(subjData$meduCnbGo1[which(subjData$Con==1)],na.rm=T)
+
+#Depression
+subjData$Dep<-NA
+subjData$Dep[which(subjData$goassessSmryDep==4)]<-1
+numDep<-sum(subjData$Dep, na.rm=TRUE)
+ageDepMean<-mean(subjData$age[which(subjData$Dep==1)],na.rm=T)
+ageDepSd<-sd(subjData$age[which(subjData$Dep==1)],na.rm=T)
+femDep<-length(which(subjData$sex=="female" & subjData$Dep==1))/numDep
+whiteDep<-(length(which(subjData$race==1 & subjData$Dep==1)))/numDep
+meduDepMean<-mean(subjData$meduCnbGo1[which(subjData$Dep==1)],na.rm=T)
+meduDepSd<-sd(subjData$meduCnbGo1[which(subjData$Dep==1)],na.rm=T)
+
+#Generalized Anxiety Disorder
+subjData$Gad<-NA
+subjData$Gad[which(subjData$goassessSmryGad==4)]<-1
+numGad<-sum(subjData$Gad, na.rm=TRUE)
+ageGadMean<-mean(subjData$age[which(subjData$Gad==1)],na.rm=T)
+ageGadSd<-sd(subjData$age[which(subjData$Gad==1)],na.rm=T)
+femGad<-length(which(subjData$sex=="female" & subjData$Gad==1))/numGad
+whiteGad<-(length(which(subjData$race==1 & subjData$Gad==1)))/numGad
+meduGadMean<-mean(subjData$meduCnbGo1[which(subjData$Gad==1)],na.rm=T)
+meduGadSd<-sd(subjData$meduCnbGo1[which(subjData$Gad==1)],na.rm=T)
+
+#Mania
+subjData$Man<-NA
+subjData$Man[which(subjData$goassessSmryMan==4)]<-1
+numMan<-sum(subjData$Man, na.rm=TRUE)
+ageManMean<-mean(subjData$age[which(subjData$Man==1)],na.rm=T)
+ageManSd<-sd(subjData$age[which(subjData$Man==1)],na.rm=T)
+femMan<-length(which(subjData$sex=="female" & subjData$Man==1))/numMan
+whiteMan<-(length(which(subjData$race==1 & subjData$Man==1)))/numMan
+meduManMean<-mean(subjData$meduCnbGo1[which(subjData$Man==1)],na.rm=T)
+meduManSd<-sd(subjData$meduCnbGo1[which(subjData$Man==1)],na.rm=T)
+
+#OCD
+subjData$Ocd<-NA
+subjData$Ocd[which(subjData$goassessSmryOcd==4)]<-1
+numOcd<-sum(subjData$Ocd, na.rm=TRUE)
+ageOcdMean<-mean(subjData$age[which(subjData$Ocd==1)],na.rm=T)
+ageOcdSd<-sd(subjData$age[which(subjData$Ocd==1)],na.rm=T)
+femOcd<-length(which(subjData$sex=="female" & subjData$Ocd==1))/numOcd
+whiteOcd<-(length(which(subjData$race==1 & subjData$Ocd==1)))/numOcd
+meduOcdMean<-mean(subjData$meduCnbGo1[which(subjData$Ocd==1)],na.rm=T)
+meduOcdSd<-sd(subjData$meduCnbGo1[which(subjData$Ocd==1)],na.rm=T)
+
+#Oppositional Defiant Disorder
+subjData$Odd<-NA
+subjData$Odd[which(subjData$goassessSmryOdd==4)]<-1
+numOdd<-sum(subjData$Odd, na.rm=TRUE)
+ageOddMean<-mean(subjData$age[which(subjData$Odd==1)],na.rm=T)
+ageOddSd<-sd(subjData$age[which(subjData$Odd==1)],na.rm=T)
+femOdd<-length(which(subjData$sex=="female" & subjData$Odd==1))/numOdd
+whiteOdd<-(length(which(subjData$race==1 & subjData$Odd==1)))/numOdd
+meduOddMean<-mean(subjData$meduCnbGo1[which(subjData$Odd==1)],na.rm=T)
+meduOddSd<-sd(subjData$meduCnbGo1[which(subjData$Odd==1)],na.rm=T)
+
+#Panic Disorder
+subjData$Pan<-NA
+subjData$Pan[which(subjData$goassessSmryPan==4)]<-1
+numPan<-sum(subjData$Pan, na.rm=TRUE)
+agePanMean<-mean(subjData$age[which(subjData$Pan==1)],na.rm=T)
+agePanSd<-sd(subjData$age[which(subjData$Pan==1)],na.rm=T)
+femPan<-length(which(subjData$sex=="female" & subjData$Pan==1))/numPan
+whitePan<-(length(which(subjData$race==1 & subjData$Pan==1)))/numPan
+meduPanMean<-mean(subjData$meduCnbGo1[which(subjData$Pan==1)],na.rm=T)
+meduPanSd<-sd(subjData$meduCnbGo1[which(subjData$Pan==1)],na.rm=T)
+
+#Specific Phobia
+subjData$Phb<-NA
+subjData$Phb[which(subjData$goassessSmryPhb==4)]<-1
+numPhb<-sum(subjData$Phb, na.rm=TRUE)
+agePhbMean<-mean(subjData$age[which(subjData$Phb==1)],na.rm=T)
+agePhbSd<-sd(subjData$age[which(subjData$Phb==1)],na.rm=T)
+femPhb<-length(which(subjData$sex=="female" & subjData$Phb==1))/numPhb
+whitePhb<-(length(which(subjData$race==1 & subjData$Phb==1)))/numPhb
+meduPhbMean<-mean(subjData$meduCnbGo1[which(subjData$Phb==1)],na.rm=T)
+meduPhbSd<-sd(subjData$meduCnbGo1[which(subjData$Phb==1)],na.rm=T)
+
+#Psychosis
+subjData$Ps<-NA
+subjData$Ps[which(subjData$goassessDxpmr4=="4PS")]<-1
+numPs<-sum(subjData$Ps, na.rm=TRUE)
+agePsMean<-mean(subjData$age[which(subjData$Ps==1)],na.rm=T)
+agePsSd<-sd(subjData$age[which(subjData$Ps==1)],na.rm=T)
+femPs<-length(which(subjData$sex=="female" & subjData$Ps==1))/numPs
+whitePs<-(length(which(subjData$race==1 & subjData$Ps==1)))/numPs
+meduPsMean<-mean(subjData$meduCnbGo1[which(subjData$Ps==1)],na.rm=T)
+meduPsSd<-sd(subjData$meduCnbGo1[which(subjData$Ps==1)],na.rm=T)
+
+#Posttraumatic Stress Disorder
+subjData$Ptd<-NA
+subjData$Ptd[which(subjData$goassessSmryPtd==4)]<-1
+numPtd<-sum(subjData$Ptd, na.rm=TRUE)
+agePtdMean<-mean(subjData$age[which(subjData$Ptd==1)],na.rm=T)
+agePtdSd<-sd(subjData$age[which(subjData$Ptd==1)],na.rm=T)
+femPtd<-length(which(subjData$sex=="female" & subjData$Ptd==1))/numPtd
+whitePtd<-(length(which(subjData$race==1 & subjData$Ptd==1)))/numPtd
+meduPtdMean<-mean(subjData$meduCnbGo1[which(subjData$Ptd==1)],na.rm=T)
+meduPtdSd<-sd(subjData$meduCnbGo1[which(subjData$Ptd==1)],na.rm=T)
+
+#Separation Anxiety Disorder
+subjData$Sep<-NA
+subjData$Sep[which(subjData$goassessSmrySep==4)]<-1
+numSep<-sum(subjData$Sep, na.rm=TRUE)
+ageSepMean<-mean(subjData$age[which(subjData$Sep==1)],na.rm=T)
+ageSepSd<-sd(subjData$age[which(subjData$Sep==1)],na.rm=T)
+femSep<-length(which(subjData$sex=="female" & subjData$Sep==1))/numSep
+whiteSep<-(length(which(subjData$race==1 & subjData$Sep==1)))/numSep
+meduSepMean<-mean(subjData$meduCnbGo1[which(subjData$Sep==1)],na.rm=T)
+meduSepSd<-sd(subjData$meduCnbGo1[which(subjData$Sep==1)],na.rm=T)
+
+#Social Anxiety Disorder
+subjData$Soc<-NA
+subjData$Soc[which(subjData$goassessSmrySoc==4)]<-1
+numSoc<-sum(subjData$Soc, na.rm=TRUE)
+ageSocMean<-mean(subjData$age[which(subjData$Soc==1)],na.rm=T)
+ageSocSd<-sd(subjData$age[which(subjData$Soc==1)],na.rm=T)
+femSoc<-length(which(subjData$sex=="female" & subjData$Soc==1))/numSoc
+whiteSoc<-(length(which(subjData$race==1 & subjData$Soc==1)))/numSoc
+meduSocMean<-mean(subjData$meduCnbGo1[which(subjData$Soc==1)],na.rm=T)
+meduSocSd<-sd(subjData$meduCnbGo1[which(subjData$Soc==1)],na.rm=T)
+
+#Typically Developing
+dxNames<-c("bblid","Add","Agr","Ano","Bul","Con","Dep","Gad","Man","Ocd","Odd","Pan","Phb","Ps","Ptd","Sep","Soc")
+dxDf<-data.matrix(subjData[,dxNames])
+subjData$totDx<-rowSums(dxDf[,2:17], na.rm=TRUE) #This is how many people have how many diagnoses: sum(totDx==0):419, sum(totDx==1):317, sum(totDx>=2):650
+subjData$Td<-0
+subjData$Td[which(subjData$totDx==0)]<-1
+numTd<-sum(subjData$Td, na.rm=TRUE)
+ageTdMean<-mean(subjData$age[which(subjData$Td==1)],na.rm=T)
+ageTdSd<-sd(subjData$age[which(subjData$Td==1)],na.rm=T)
+femTd<-length(which(subjData$sex=="female" & subjData$Td==1))/numTd
+whiteTd<-(length(which(subjData$race==1 & subjData$Td==1)))/numTd
+meduTdMean<-mean(subjData$meduCnbGo1[which(subjData$Td==1)],na.rm=T)
+meduTdSd<-sd(subjData$meduCnbGo1[which(subjData$Td==1)],na.rm=T)
+
+
+#####################################
+#### MAKE TD THE REFERENCE GROUP ####
+#####################################
+
+subjData$Add[which(subjData$Td==1)]<-0
+subjData$Agr[which(subjData$Td==1)]<-0
+subjData$Ano[which(subjData$Td==1)]<-0
+subjData$Bul[which(subjData$Td==1)]<-0
+subjData$Con[which(subjData$Td==1)]<-0
+subjData$Dep[which(subjData$Td==1)]<-0
+subjData$Gad[which(subjData$Td==1)]<-0
+subjData$Man[which(subjData$Td==1)]<-0
+subjData$Ocd[which(subjData$Td==1)]<-0
+subjData$Odd[which(subjData$Td==1)]<-0
+subjData$Pan[which(subjData$Td==1)]<-0
+subjData$Phb[which(subjData$Td==1)]<-0
+subjData$Ps[which(subjData$Td==1)]<-0
+subjData$Ptd[which(subjData$Td==1)]<-0
+subjData$Sep[which(subjData$Td==1)]<-0
+subjData$Soc[which(subjData$Td==1)]<-0
+
+
+#################
+### SAVE DATA ###
+#################
+
+saveRDS(subjData,"/data/joy/BBL/projects/pncT1AcrossDisorder_Volume/subjectData/n1359_JLF_subjData_diag.rds")
+
+
+###############################
+#### TABLE 1: DEMOGRAPHICS ####
+###############################
+
+#Combine variables
+dxNames<-c("bblid","Td","Add","Agr","Ano","Bul","Con","Gad","Dep","Man","Ocd","Odd","Pan","Phb","Ps","Ptd","Sep","Soc")
+dxDf<-subjData[,dxNames]
+
+numComb<-c(numTd,numAdd,numAgr,numAno,numBul,numCon,numGad,numDep,numMan,numOcd,numOdd,numPan,numPhb,numPs,numPtd,numSep,numSoc)
+
+ageMeanComb<-round(c(ageTdMean,ageAddMean,ageAgrMean,ageAnoMean,ageBulMean,ageConMean,ageGadMean,ageDepMean,ageManMean,ageOcdMean,ageOddMean,agePanMean,agePhbMean,agePsMean,agePtdMean,ageSepMean,ageSocMean),2)
+
+ageSdComb<-round(c(ageTdSd,ageAddSd,ageAgrSd,ageAnoSd,ageBulSd,ageConSd,ageGadSd,ageDepSd,ageManSd,ageOcdSd,ageOddSd,agePanSd,agePhbSd,agePsSd,agePtdSd,ageSepSd,ageSocSd),2)
+
+femComb<-round(c(femTd,femAdd,femAgr,femAno,femBul,femCon,femGad,femDep,femMan,femOcd,femOdd,femPan,femPhb,femPs,femPtd,femSep,femSoc),3)*100
+
+whiteComb<-round(c(whiteTd,whiteAdd,whiteAgr,whiteAno,whiteBul,whiteCon,whiteGad,whiteDep,whiteMan,whiteOcd,whiteOdd,whitePan,whitePhb,whitePs,whitePtd,whiteSep,whiteSoc),3)*100
+
+meduMeanComb<-round(c(meduTdMean,meduAddMean,meduAgrMean,meduAnoMean,meduBulMean,meduConMean,meduGadMean,meduDepMean,meduManMean,meduOcdMean,meduOddMean,meduPanMean,meduPhbMean,meduPsMean,meduPtdMean,meduSepMean,meduSocMean),2)
+
+meduSdComb<-round(c(meduTdSd,meduAddSd,meduAgrSd,meduAnoSd,meduBulSd,meduConSd,meduGadSd,meduDepSd,meduManSd,meduOcdSd,meduOddSd,meduPanSd,meduPhbSd,meduPsSd,meduPtdSd,meduSepSd,meduSocSd),2)
+
+#MAKE TABLE
+dxNamesFull<-c("Typically Developing","ADHD","Agoraphobia","Anorexia","Bulimia","Conduct Disorder","Generalized Anxiety Disorder","Major Depression","Mania","Obsessive-Compulsive Disorder","Oppositional Defiant Disorder","Panic","Phobias","Psychosis-spectrum","PTSD","Separation Anxiety","Social Phobia")
+table1<-as.data.frame(matrix(nrow=17,ncol=7))
+row.names(table1)<-dxNamesFull
+colnames(table1)[1]<-"N"
+colnames(table1)[2]<-"Female (%)"
+colnames(table1)[3]<-"Caucasian (%)"
+colnames(table1)[4]<-"Mean Age"
+colnames(table1)[5]<-"SD Age"
+colnames(table1)[6]<-"Mean Maternal Education (Years)"
+colnames(table1)[7]<-"SD Maternal Education"
+table1[,1]<-numComb
+table1[,2]<-femComb
+table1[,3]<-whiteComb
+table1[,4]<-ageMeanComb
+table1[,5]<-ageSdComb
+table1[,6]<-meduMeanComb
+table1[,7]<-meduSdComb
+
+#SAVE TABLE
+write.csv(table1,"/data/joy/BBL/projects/pncT1AcrossDisorder_Volume/TablesFigures/Table1.csv",row.names=TRUE,quote=FALSE)
+
+
+###################################################
+#### FIGURE 1: BIFACTORS BY SCREENING CATEGORY ####
+###################################################
+
+#Create table with bifactor means and sds only for diagnoses with >20 subjects.
+facTbl<-as.data.frame(matrix(nrow=13,ncol=10))
+colnames(facTbl)[1]<-"OverallMean"
+colnames(facTbl)[2]<-"OverallSem"
+colnames(facTbl)[3]<-"MoodMean"
+colnames(facTbl)[4]<-"MoodSem"
+colnames(facTbl)[5]<-"PsychosisMean"
+colnames(facTbl)[6]<-"PsychosisSem"
+colnames(facTbl)[7]<-"ExternalizingMean"
+colnames(facTbl)[8]<-"ExternalizingSem"
+colnames(facTbl)[9]<-"PhobiasMean"
+colnames(facTbl)[10]<-"PhobiasSem"
+
+#Name the rows
+dxNamesShort<-c("ADHD","Agoraphobia","Conduct","GAD","MDD","OCD","ODD","Phobias","Psychosis","PTSD","Separation Anxiety","Social Phobia","TD")
+
+row.names(facTbl)<-dxNamesShort
+
+dxs<-c("Add","Agr","Con","Gad","Dep","Ocd","Odd","Phb","Ps","Ptd","Sep","Soc","Td")
+
+#Calculate means and standard deviations
+for (i in 1:13){
+        dx<-dxs[i]
+        print(dx)
+        y<-subjData[,dx]
+
+        facTbl[i,1]<-mean(subjData$goassessItemBifactor4FactorOverallPsy[which(y==1)],na.rm=TRUE)
+        facTbl[i,2]<-sd(subjData$goassessItemBifactor4FactorOverallPsy[which(y==1)],na.rm=TRUE)/sqrt(length(which(y==1)))
+
+        facTbl[i,3]<-mean(subjData$goassessItemBifactor4FactorMood[which(y==1)],na.rm=TRUE)
+        facTbl[i,4]<-sd(subjData$goassessItemBifactor4FactorMood[which(y==1)],na.rm=TRUE)/sqrt(length(which(y==1)))
+
+        facTbl[i,5]<-mean(subjData$goassessItemBifactor4FactorPsych[which(y==1)],na.rm=TRUE)
+        facTbl[i,6]<-sd(subjData$goassessItemBifactor4FactorPsych[which(y==1)],na.rm=TRUE)/sqrt(length(which(y==1)))
+
+        facTbl[i,7]<-mean(subjData$goassessItemBifactor4FactorExt[which(y==1)],na.rm=TRUE)
+        facTbl[i,8]<-sd(subjData$goassessItemBifactor4FactorExt[which(y==1)],na.rm=TRUE)/sqrt(length(which(y==1)))
+
+        facTbl[i,9]<-mean(subjData$goassessItemBifactor4FactorPhb[which(y==1)],na.rm=TRUE)
+        facTbl[i,10]<-sd(subjData$goassessItemBifactor4FactorPhb[which(y==1)],na.rm=TRUE)/sqrt(length(which(y==1)))
+
+}
+
+
+#Reshape to long format
+library(reshape2)
+facTbl$group<-as.factor(dxs)
+facTblSem<-facTbl[,c(2,4,6,8,10,11)]
+facTblMean<-facTbl[,c(1,3,5,7,9,11)]
+facTblMeanLong<-melt(facTblMean,id.vars="group",variable.name="factor",value.name="meanScore")
+facTblSemLong<-melt(facTblSem,id.vars="group",variable.name="factor",value.name="semScore")
+facTblLong<-facTblMeanLong
+facTblLong$semScore<-facTblSemLong$semScore
+
+#Remove empty factors
+facTblLong$group<-factor(facTblLong$group)
+
+
+#Plot w/ ggplot
+library(ggplot2)
+library(grid)
+
+#Colors used: #329444 = green (OverallPsych), #325194 = blue (Anxious-Misery), #943282 = purple (Psychosis), #B3141C = red (Behavioral), #F58311 = orange (Fear)
+
+Fig1<-ggplot(facTblLong, aes(x=group, y=meanScore,fill=factor)) +
+        ylab("Factor Score (z)") + xlab("") + ggtitle("Orthogonal Dimensions of Psychopathology by Screening Diagnosis") +
+	geom_bar(stat="identity",position=position_dodge()) +
+        scale_fill_manual(values=c("#329444","#325194","#943282","#B3141C","#F58311"), breaks=c("OverallMean","MoodMean","PsychosisMean","ExternalizingMean","PhobiasMean"),
+	labels=c("Overall Psychopathology", "Anxious-Misery", "Psychosis", "Behavioral", "Fear")) +
+	theme(axis.title.y = element_text(size = rel(1.5), angle = 90)) + theme(legend.text = element_text(size = 10), legend.justification=c(0.5,0.5), legend.position=c(.9,.9)) +
+	theme(plot.title = element_text(size = rel(1.5), vjust = 2)) + theme(axis.text.x = element_text(size = rel(1.25), colour="black")) +
+	theme(axis.text.y = element_text(size = rel(1.25), colour="black")) + guides(fill=guide_legend(title=NULL)) +
+	scale_x_discrete(breaks=c("Add","Agr","Con","Gad","Dep","Ocd","Odd","Phb","Ps","Ptd","Sep","Soc","Td"), labels=c("ADHD","Agoraphobia","Conduct","GAD","MDD","OCD","ODD",
+	"Phobias","Psychosis","PTSD","Separation Anx","Social Anx","TD")) + theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) +
+	theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line.x = element_line(colour = "black"), 
+	axis.line.y = element_line(colour = "black"))
+
+#see colors used in plot (leave "data" specified as is)
+Plot1<-ggplot_build(Fig1)$data
+
+ggsave(file="/data/joy/BBL/projects/pncT1AcrossDisorder_Volume/TablesFigures/Figure1_BifactorsByDiag.png", width = 15, height = 5, units = "in", dpi = 300)
+
+
+##helpful ggplot guides:
+#ylab- y label title
+#xlab- x label title
+#ggtitle- plot title
+#geom_bar - make bar plot
+#geom_errorbar - create error-bars on plot
+#scale_fill_manual- manually change the colors and names of the legend labels
+#Within theme(axis.title.y = element_text()) or theme(axis.title.x = element_text()) or theme(plot.title = element_text()) you can change:
+        #size = size of axis title
+        #angle = orientation of text
+        #vjust = vertical adjustment of text from axes
+        #hjust = horizontal adjustment of text from axes
+        #color = change color of text
+#Above also works for axis tick labels using theme(axis.text.y=element_text()) or theme(axis.text.x=element_text())
+#guides(fill=guide_legend(title=NULL)) - remove legend title
+#scale_x_discrete(breaks=c("",""), labels=c("","")) - take the pre-existing axis labels and give them new labels
+#theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) - change the margins of the plot to add a little extra room around the entire figure. Note: this requires the function "unit" from the package "grid" to work. unit(c(top,right,bottom,left))
+#geom_bar(size=0.3) = changes the thickness of the black line around each bar (1 = thicker, .03 = thinner)
+#geom_bar(color="black") = changes the color of the black line around each bar (remove this command to remove the black outlines).
+#legend.justification = defines which side of the legend that the legend.position coordinates refer to (can use left, right, centre or numeric value (x = between 0 and 1))
+#legend.position = move the legend (accepts left, right, top, bottom or define relative coordinates on plot c(x, y) between 0 and 1) 
+
+
+
+###########################################
+#### CREATE SUBSETS FOR EACH DIAGNOSIS ####
+###########################################
+
+#subset the data for each diagnosis with N>20
+AddData<-subjData[!is.na(subjData$Add), ]
+AgrData<-subjData[!is.na(subjData$Agr), ]
+ConData<-subjData[!is.na(subjData$Con), ]
+DepData<-subjData[!is.na(subjData$Dep), ]
+GadData<-subjData[!is.na(subjData$Gad), ]
+OcdData<-subjData[!is.na(subjData$Ocd), ]
+OddData<-subjData[!is.na(subjData$Odd), ]
+PhbData<-subjData[!is.na(subjData$Phb), ]
+PsData<-subjData[!is.na(subjData$Ps), ]
+PtdData<-subjData[!is.na(subjData$Ptd), ]
+SepData<-subjData[!is.na(subjData$Sep), ]
+SocData<-subjData[!is.na(subjData$Soc), ]
+
+
+##################
+#### LS MEANS ####
+##################
+
+#Load library; If not installed, then use this command: install.packages("lsmeans", repos="http://R-Forge.R-project.org")
+library(lsmeans)
+
+#Use lsmeans to save the adjusted mean for each disorder
+
+#First, define lists
+Vol_GmWmList <- names(subjData)[2342:2344]
+Vol_LobeList <- names(subjData)[2708:2712]
+
+dataJLF<-subjData[,grep("mprage_jlf_vol",names(subjData))]
+dataJLFGm<-dataJLF[,-(unique(c( grep("WM",names(dataJLF)), grep("Vent",names(dataJLF)), grep("White",names(dataJLF)), grep("corpus",names(dataJLF)), grep("DC",names(dataJLF)), grep("Brain_Stem",names(dataJLF)), grep("CSF",names(dataJLF)), grep("InC",names(dataJLF)), grep("fornix",names(dataJLF)), grep("ped",names(dataJLF)), grep("Vessel",names(dataJLF)), grep("OpticChiasm",names(dataJLF)) )))]
+Vol_ROIList <- colnames(dataJLFGm)
+
+
+###ADD###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Add_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Add, list(i = as.name(x))), data = AddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Add_GmWmLSMeans_vol<-sapply(Add_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$lsmean } )
+Add_GmWmSEs_vol<-sapply(Add_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Add_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Add, list(i = as.name(x))), data = AddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Add_LobeLSMeans_vol<-sapply(Add_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$lsmean } )
+Add_LobeSEs_vol<-sapply(Add_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Add_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Add, list(i = as.name(x))), data = AddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Add_ROILSMeans_vol<-sapply(Add_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$lsmean } )
+Add_ROISEs_vol<-sapply(Add_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Add))$SE } )
+
+
+
+###Agr###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Agr_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Agr, list(i = as.name(x))), data = AgrData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Agr_GmWmLSMeans_vol<-sapply(Agr_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$lsmean } )
+Agr_GmWmSEs_vol<-sapply(Agr_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Agr_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Agr, list(i = as.name(x))), data = AgrData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Agr_LobeLSMeans_vol<-sapply(Agr_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$lsmean } )
+Agr_LobeSEs_vol<-sapply(Agr_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Agr_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Agr, list(i = as.name(x))), data = AgrData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Agr_ROILSMeans_vol<-sapply(Agr_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$lsmean } )
+Agr_ROISEs_vol<-sapply(Agr_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Agr))$SE } )
+
+
+
+###CON###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Con_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Con, list(i = as.name(x))), data = ConData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Con_GmWmLSMeans_vol<-sapply(Con_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$lsmean } )
+Con_GmWmSEs_vol<-sapply(Con_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Con_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Con, list(i = as.name(x))), data = ConData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Con_LobeLSMeans_vol<-sapply(Con_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$lsmean } )
+Con_LobeSEs_vol<-sapply(Con_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Con_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Con, list(i = as.name(x))), data = ConData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Con_ROILSMeans_vol<-sapply(Con_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$lsmean } )
+Con_ROISEs_vol<-sapply(Con_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Con))$SE } )
+
+
+###DEP###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Dep_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Dep, list(i = as.name(x))), data = DepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Dep_GmWmLSMeans_vol<-sapply(Dep_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$lsmean } )
+Dep_GmWmSEs_vol<-sapply(Dep_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Dep_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Dep, list(i = as.name(x))), data = DepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Dep_LobeLSMeans_vol<-sapply(Dep_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$lsmean } )
+Dep_LobeSEs_vol<-sapply(Dep_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Dep_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Dep, list(i = as.name(x))), data = DepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Dep_ROILSMeans_vol<-sapply(Dep_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$lsmean } )
+Dep_ROISEs_vol<-sapply(Dep_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Dep))$SE } )
+
+
+###GAD###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Gad_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Gad, list(i = as.name(x))), data = GadData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Gad_GmWmLSMeans_vol<-sapply(Gad_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$lsmean } )
+Gad_GmWmSEs_vol<-sapply(Gad_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Gad_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Gad, list(i = as.name(x))), data = GadData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Gad_LobeLSMeans_vol<-sapply(Gad_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$lsmean } )
+Gad_LobeSEs_vol<-sapply(Gad_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Gad_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Gad, list(i = as.name(x))), data = GadData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Gad_ROILSMeans_vol<-sapply(Gad_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$lsmean } )
+Gad_ROISEs_vol<-sapply(Gad_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Gad))$SE } )
+
+
+###OCD###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Ocd_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ocd, list(i = as.name(x))), data = OcdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ocd_GmWmLSMeans_vol<-sapply(Ocd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$lsmean } )
+Ocd_GmWmSEs_vol<-sapply(Ocd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Ocd_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ocd, list(i = as.name(x))), data = OcdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ocd_LobeLSMeans_vol<-sapply(Ocd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$lsmean } )
+Ocd_LobeSEs_vol<-sapply(Ocd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Ocd_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ocd, list(i = as.name(x))), data = OcdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ocd_ROILSMeans_vol<-sapply(Ocd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$lsmean } )
+Ocd_ROISEs_vol<-sapply(Ocd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ocd))$SE } )
+
+
+
+###ODD###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Odd_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Odd, list(i = as.name(x))), data = OddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Odd_GmWmLSMeans_vol<-sapply(Odd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$lsmean } )
+Odd_GmWmSEs_vol<-sapply(Odd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Odd_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Odd, list(i = as.name(x))), data = OddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Odd_LobeLSMeans_vol<-sapply(Odd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$lsmean } )
+Odd_LobeSEs_vol<-sapply(Odd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Odd_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Odd, list(i = as.name(x))), data = OddData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Odd_ROILSMeans_vol<-sapply(Odd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$lsmean } )
+Odd_ROISEs_vol<-sapply(Odd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Odd))$SE } )
+
+
+###PHB###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Phb_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Phb, list(i = as.name(x))), data = PhbData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Phb_GmWmLSMeans_vol<-sapply(Phb_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$lsmean } )
+Phb_GmWmSEs_vol<-sapply(Phb_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Phb_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Phb, list(i = as.name(x))), data = PhbData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Phb_LobeLSMeans_vol<-sapply(Phb_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$lsmean } )
+Phb_LobeSEs_vol<-sapply(Phb_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Phb_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Phb, list(i = as.name(x))), data = PhbData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Phb_ROILSMeans_vol<-sapply(Phb_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$lsmean } )
+Phb_ROISEs_vol<-sapply(Phb_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Phb))$SE } )
+
+
+###PS###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Ps_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ps, list(i = as.name(x))), data = PsData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ps_GmWmLSMeans_vol<-sapply(Ps_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$lsmean } )
+Ps_GmWmSEs_vol<-sapply(Ps_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Ps_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ps, list(i = as.name(x))), data = PsData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ps_LobeLSMeans_vol<-sapply(Ps_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$lsmean } )
+Ps_LobeSEs_vol<-sapply(Ps_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Ps_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ps, list(i = as.name(x))), data = PsData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ps_ROILSMeans_vol<-sapply(Ps_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$lsmean } )
+Ps_ROISEs_vol<-sapply(Ps_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ps))$SE } )
+
+
+###PTD###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Ptd_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ptd, list(i = as.name(x))), data = PtdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ptd_GmWmLSMeans_vol<-sapply(Ptd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$lsmean } )
+Ptd_GmWmSEs_vol<-sapply(Ptd_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Ptd_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ptd, list(i = as.name(x))), data = PtdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ptd_LobeLSMeans_vol<-sapply(Ptd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$lsmean } )
+Ptd_LobeSEs_vol<-sapply(Ptd_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Ptd_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Ptd, list(i = as.name(x))), data = PtdData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Ptd_ROILSMeans_vol<-sapply(Ptd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$lsmean } )
+Ptd_ROISEs_vol<-sapply(Ptd_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Ptd))$SE } )
+
+
+###Sep###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Sep_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Sep, list(i = as.name(x))), data = SepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Sep_GmWmLSMeans_vol<-sapply(Sep_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$lsmean } )
+Sep_GmWmSEs_vol<-sapply(Sep_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Sep_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Sep, list(i = as.name(x))), data = SepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Sep_LobeLSMeans_vol<-sapply(Sep_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$lsmean } )
+Sep_LobeSEs_vol<-sapply(Sep_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Sep_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Sep, list(i = as.name(x))), data = SepData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Sep_ROILSMeans_vol<-sapply(Sep_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$lsmean } )
+Sep_ROISEs_vol<-sapply(Sep_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Sep))$SE } )
+
+
+
+###SOC###
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Soc_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Soc, list(i = as.name(x))), data = SocData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Soc_GmWmLSMeans_vol<-sapply(Soc_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$lsmean } )
+Soc_GmWmSEs_vol<-sapply(Soc_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Soc_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Soc, list(i = as.name(x))), data = SocData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Soc_LobeLSMeans_vol<-sapply(Soc_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$lsmean } )
+Soc_LobeSEs_vol<-sapply(Soc_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Soc_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Soc, list(i = as.name(x))), data = SocData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Soc_ROILSMeans_vol<-sapply(Soc_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$lsmean } )
+Soc_ROISEs_vol<-sapply(Soc_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Soc))$SE } )
+
+
+###TD###
+
+#Get lsmeans and SEs for TD vs all diagnoses (for plotting)
+
+#Run models for GM/WM/CSF
+require(lsmeans)
+Td_GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Td, list(i = as.name(x))), data = subjData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Td_GmWmLSMeans_vol<-sapply(Td_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$lsmean } )
+Td_GmWmSEs_vol<-sapply(Td_GmWmModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$SE } )
+
+#Run models for Lobes
+require(lsmeans)
+Td_LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Td, list(i = as.name(x))), data = subjData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Td_LobeLSMeans_vol<-sapply(Td_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$lsmean } )
+Td_LobeSEs_vol<-sapply(Td_LobeModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$SE } )
+
+#Run models for ROIs
+require(lsmeans)
+Td_ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    lm(substitute(i ~ age + sex + ageSq + mprage_antsCT_vol_TBV + Td, list(i = as.name(x))), data = subjData)
+})
+
+#Calculate and pull the lsmeans and SEs from each lm summary
+Td_ROILSMeans_vol<-sapply(Td_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$lsmean } )
+Td_ROISEs_vol<-sapply(Td_ROIModels_vol, function(x) { f <- summary(lsmeans(x, ~ Td))$SE } )
+
+ 
+
+####################
+### EFFECT SIZES ###
+####################
+
+#Compute covariate-adjusted effect sizes (Cohens d)
+
+#Define the effect size function (which controls for covariates)
+###NOTE: the coefficient is hard coded at t$coefficients[6,1], if you change the number of variables in your model, this number will also have to be changed.
+dCov<-function(x){
+  t<-summary(x)
+  effsize <- t$coefficients[6,1]/t$sigma
+  return(abs(effsize))
+}
+
+#Double check that the effect size (estimate divided by residual standard error) is correctly calculated.
+#test<-lm(Vol_gmSubcortTotal~ age + sex + ageSq + mprage_antsCT_vol_TBV + Add, data = AddData)
+
+#Calculate effect sizes:
+
+#Add vs Td
+Add_GmWmModels_vol_d<-lapply(Add_GmWmModels_vol, dCov)
+Add_LobeModels_vol_d<-lapply(Add_LobeModels_vol, dCov)
+Add_ROIModels_vol_d<-lapply(Add_ROIModels_vol, dCov)
+
+#Agr vs Td
+Agr_GmWmModels_vol_d<-lapply(Agr_GmWmModels_vol, dCov)
+Agr_LobeModels_vol_d<-lapply(Agr_LobeModels_vol, dCov)
+Agr_ROIModels_vol_d<-lapply(Agr_ROIModels_vol, dCov)
+
+#Con vs Td
+Con_GmWmModels_vol_d<-lapply(Con_GmWmModels_vol, dCov)
+Con_LobeModels_vol_d<-lapply(Con_LobeModels_vol, dCov)
+Con_ROIModels_vol_d<-lapply(Con_ROIModels_vol, dCov)
+
+#Dep vs Td
+Dep_GmWmModels_vol_d<-lapply(Dep_GmWmModels_vol, dCov)
+Dep_LobeModels_vol_d<-lapply(Dep_LobeModels_vol, dCov)
+Dep_ROIModels_vol_d<-lapply(Dep_ROIModels_vol, dCov)
+
+#Gad vs Td
+Gad_GmWmModels_vol_d<-lapply(Gad_GmWmModels_vol, dCov)
+Gad_LobeModels_vol_d<-lapply(Gad_LobeModels_vol, dCov)
+Gad_ROIModels_vol_d<-lapply(Gad_ROIModels_vol, dCov)
+
+#Ocd vs Td
+Ocd_GmWmModels_vol_d<-lapply(Ocd_GmWmModels_vol, dCov)
+Ocd_LobeModels_vol_d<-lapply(Ocd_LobeModels_vol, dCov)
+Ocd_ROIModels_vol_d<-lapply(Ocd_ROIModels_vol, dCov)
+
+#Odd vs Td
+Odd_GmWmModels_vol_d<-lapply(Odd_GmWmModels_vol, dCov)
+Odd_LobeModels_vol_d<-lapply(Odd_LobeModels_vol, dCov)
+Odd_ROIModels_vol_d<-lapply(Odd_ROIModels_vol, dCov)
+
+#Phb vs Td
+Phb_GmWmModels_vol_d<-lapply(Phb_GmWmModels_vol, dCov)
+Phb_LobeModels_vol_d<-lapply(Phb_LobeModels_vol, dCov)
+Phb_ROIModels_vol_d<-lapply(Phb_ROIModels_vol, dCov)
+
+#Ps vs Td
+Ps_GmWmModels_vol_d<-lapply(Ps_GmWmModels_vol, dCov)
+Ps_LobeModels_vol_d<-lapply(Ps_LobeModels_vol, dCov)
+Ps_ROIModels_vol_d<-lapply(Ps_ROIModels_vol, dCov)
+
+#Ptd vs Td
+Ptd_GmWmModels_vol_d<-lapply(Ptd_GmWmModels_vol, dCov)
+Ptd_LobeModels_vol_d<-lapply(Ptd_LobeModels_vol, dCov)
+Ptd_ROIModels_vol_d<-lapply(Ptd_ROIModels_vol, dCov)
+
+#Sep vs Td
+Sep_GmWmModels_vol_d<-lapply(Sep_GmWmModels_vol, dCov)
+Sep_LobeModels_vol_d<-lapply(Sep_LobeModels_vol, dCov)
+Sep_ROIModels_vol_d<-lapply(Sep_ROIModels_vol, dCov)
+
+#Soc vs Td
+Soc_GmWmModels_vol_d<-lapply(Soc_GmWmModels_vol, dCov)
+Soc_LobeModels_vol_d<-lapply(Soc_LobeModels_vol, dCov)
+Soc_ROIModels_vol_d<-lapply(Soc_ROIModels_vol, dCov)
+
+
+
+############################################################
+#### FIGURE 2: LOBE EFFECT SIZES BY SCREENING CATEGORY ####
+############################################################
+
+##Create table with lobe effect sizes only for diagnoses with >20 subjects.
+facTbl2<-as.data.frame(matrix(nrow=12,ncol=5))
+colnames(facTbl2)[1]<-"Subcortical"
+colnames(facTbl2)[2]<-"Frontal"
+colnames(facTbl2)[3]<-"Occipital"
+colnames(facTbl2)[4]<-"Parietal"
+colnames(facTbl2)[5]<-"Temporal"
+
+##Name the rows
+dxNamesShort2<-c("ADHD","Agoraphobia","Conduct","GAD","MDD","OCD","ODD","Phobias","Psychosis","PTSD","Separation Anxiety","Social Phobia")
+
+row.names(facTbl2)<-dxNamesShort2
+
+dxs2<-c("Add","Agr","Con","Gad","Dep","Ocd","Odd","Phb","Ps","Ptd","Sep","Soc")
+
+##Add effect sizes to table
+         facTbl2[1,1]<-Add_LobeModels_vol_d[1]
+         facTbl2[1,2]<-Add_LobeModels_vol_d[2]
+	 facTbl2[1,3]<-Add_LobeModels_vol_d[3]
+         facTbl2[1,4]<-Add_LobeModels_vol_d[4]
+	 facTbl2[1,5]<-Add_LobeModels_vol_d[5]
+
+         facTbl2[2,1]<-Agr_LobeModels_vol_d[1]
+         facTbl2[2,2]<-Agr_LobeModels_vol_d[2]
+	 facTbl2[2,3]<-Agr_LobeModels_vol_d[3]
+         facTbl2[2,4]<-Agr_LobeModels_vol_d[4]
+         facTbl2[2,5]<-Agr_LobeModels_vol_d[5]
+
+         facTbl2[3,1]<-Con_LobeModels_vol_d[1]
+         facTbl2[3,2]<-Con_LobeModels_vol_d[2]
+	 facTbl2[3,3]<-Con_LobeModels_vol_d[3]
+         facTbl2[3,4]<-Con_LobeModels_vol_d[4]
+         facTbl2[3,5]<-Con_LobeModels_vol_d[5]
+
+         facTbl2[4,1]<-Gad_LobeModels_vol_d[1]
+         facTbl2[4,2]<-Gad_LobeModels_vol_d[2]
+         facTbl2[4,3]<-Gad_LobeModels_vol_d[3]
+         facTbl2[4,4]<-Gad_LobeModels_vol_d[4]
+         facTbl2[4,5]<-Gad_LobeModels_vol_d[5]
+
+         facTbl2[5,1]<-Dep_LobeModels_vol_d[1]
+         facTbl2[5,2]<-Dep_LobeModels_vol_d[2]
+	 facTbl2[5,3]<-Dep_LobeModels_vol_d[3]
+         facTbl2[5,4]<-Dep_LobeModels_vol_d[4]
+         facTbl2[5,5]<-Dep_LobeModels_vol_d[5]
+
+         facTbl2[6,1]<-Ocd_LobeModels_vol_d[1]
+         facTbl2[6,2]<-Ocd_LobeModels_vol_d[2]
+	 facTbl2[6,3]<-Ocd_LobeModels_vol_d[3]
+         facTbl2[6,4]<-Ocd_LobeModels_vol_d[4]
+         facTbl2[6,5]<-Ocd_LobeModels_vol_d[5]
+
+         facTbl2[7,1]<-Odd_LobeModels_vol_d[1]
+         facTbl2[7,2]<-Odd_LobeModels_vol_d[2]
+	 facTbl2[7,3]<-Odd_LobeModels_vol_d[3]
+         facTbl2[7,4]<-Odd_LobeModels_vol_d[4]
+         facTbl2[7,5]<-Odd_LobeModels_vol_d[5]
+
+         facTbl2[8,1]<-Phb_LobeModels_vol_d[1]
+         facTbl2[8,2]<-Phb_LobeModels_vol_d[2]
+	 facTbl2[8,3]<-Phb_LobeModels_vol_d[3]
+         facTbl2[8,4]<-Phb_LobeModels_vol_d[4]
+         facTbl2[8,5]<-Phb_LobeModels_vol_d[5]
+
+         facTbl2[9,1]<-Ps_LobeModels_vol_d[1]
+         facTbl2[9,2]<-Ps_LobeModels_vol_d[2]
+	 facTbl2[9,3]<-Ps_LobeModels_vol_d[3]
+         facTbl2[9,4]<-Ps_LobeModels_vol_d[4]
+         facTbl2[9,5]<-Ps_LobeModels_vol_d[5]
+
+         facTbl2[10,1]<-Ptd_LobeModels_vol_d[1]
+         facTbl2[10,2]<-Ptd_LobeModels_vol_d[2]
+	 facTbl2[10,3]<-Ptd_LobeModels_vol_d[3]
+         facTbl2[10,4]<-Ptd_LobeModels_vol_d[4]
+         facTbl2[10,5]<-Ptd_LobeModels_vol_d[5]
+
+         facTbl2[11,1]<-Sep_LobeModels_vol_d[1]
+         facTbl2[11,2]<-Sep_LobeModels_vol_d[2]
+	 facTbl2[11,3]<-Sep_LobeModels_vol_d[3]
+         facTbl2[11,4]<-Sep_LobeModels_vol_d[4]
+         facTbl2[11,5]<-Sep_LobeModels_vol_d[5]
+
+         facTbl2[12,1]<-Soc_LobeModels_vol_d[1]
+         facTbl2[12,2]<-Soc_LobeModels_vol_d[2]
+	 facTbl2[12,3]<-Soc_LobeModels_vol_d[3]
+         facTbl2[12,4]<-Soc_LobeModels_vol_d[4]
+         facTbl2[12,5]<-Soc_LobeModels_vol_d[5]
+
+##Reshape to long format
+library(reshape2)
+facTbl2$group<-as.factor(dxs2)
+facTblEffectSize<-facTbl2[,c(1,2,3,4,5,6)]
+facTblEFLong<-melt(facTblEffectSize,id.vars="group",variable.name="lobe",value.name="EffectSize")
+
+##Plot w/ ggplot
+library(ggplot2)
+library(grid)
+
+Fig2<-ggplot(facTblEFLong, aes(x=group, y=EffectSize,fill=lobe)) +
+     ylab("Effect Size") + xlab("") + ggtitle("Lobular Volume Loss: Screening Diagnosis vs. Typically Developing") +
+     geom_bar(stat="identity",position=position_dodge()) +
+     scale_fill_manual(values=c("#329444","#325194","#943282","#B3141C","#F58311"), breaks=c("Subcortical","Frontal","Occipital","Parietal","Temporal"),
+     labels=c("Subcortical", "Frontal Lobe", "Occipital Lobe", "Parietal Lobe", "Temporal Lobe")) +
+     theme(axis.title.y = element_text(size = rel(1.5), angle = 90)) + theme(legend.text = element_text(size = 10), legend.justification=c(0.5,0.5), 
+     legend.position=c(.825,.9)) +
+     theme(plot.title = element_text(size = rel(1.5), vjust = 2)) + theme(axis.text.x = element_text(size = rel(1.25), colour="black")) +
+     theme(axis.text.y = element_text(size = rel(1.25), colour="black")) + guides(fill=guide_legend(title=NULL)) +
+     scale_x_discrete(breaks=c("Add","Agr","Con","Gad","Dep","Ocd","Odd","Phb","Ps","Ptd","Sep","Soc","Td"), labels=c("ADHD","Agoraphobia","Conduct","GAD","MDD","OCD","ODD",
+     "Phobias","Psychosis","PTSD","Separation Anx","Social Anx","TD")) + theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) +
+     theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line.x = element_line(colour = "black"),
+     axis.line.y = element_line(colour = "black"))
+
+##see colors used in plot (leave "data" specified as is)
+#Plot1<-ggplot_build(Fig1)$data
+
+ggsave(file="/data/joy/BBL/projects/pncT1AcrossDisorder_Volume/TablesFigures/Figure2_LobeVolByDiag.png", width = 15, height = 5, units = "in", dpi = 300)
+
+
+##helpful ggplot guides:
+#ylab- y label title
+#xlab- x label title
+#ggtitle- plot title
+#geom_bar - make bar plot
+#geom_errorbar - create error-bars on plot
+#scale_fill_manual- manually change the colors and names of the legend labels
+#Within theme(axis.title.y = element_text()) or theme(axis.title.x = element_text()) or theme(plot.title = element_text()) you can change:
+        #size = size of axis title
+        #angle = orientation of text
+        #vjust = vertical adjustment of text from axes
+        #hjust = horizontal adjustment of text from axes
+        #color = change color of text
+#Above also works for axis tick labels using theme(axis.text.y=element_text()) or theme(axis.text.x=element_text())
+#guides(fill=guide_legend(title=NULL)) - remove legend title
+#scale_x_discrete(breaks=c("",""), labels=c("","")) - take the pre-existing axis labels and give them new labels
+#theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) - change the margins of the plot to add a little extra room around the entire figure. Note: this requires the function "unit" from the package "grid" to work. unit(c(top,right,bottom,left))
+#geom_bar(size=0.3) = changes the thickness of the black line around each bar (1 = thicker, .03 = thinner)
+#geom_bar(color="black") = changes the color of the black line around each bar (remove this command to remove the black outlines).
+#legend.justification = defines which side of the legend that the legend.position coordinates refer to (can use left, right, centre or numeric value (x = between 0 and 1))
+#legend.position = move the legend (accepts left, right, top, bottom or define relative coordinates on plot c(x, y) between 0 and 1)

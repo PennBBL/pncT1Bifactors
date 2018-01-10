@@ -1,0 +1,26 @@
+#Copy and paste the following to the command line:
+#Open qlogin session
+qloginp5 -l h_vmem=30.5G,s_vmem=30G
+qloginp5 -l h_vmem=40.5G,s_vmem=30G
+qloginp5 -l h_vmem=40.5G,s_vmem=40G
+qloginp2 -l h_vmem=16.5G,s_vmem=16.0G
+
+
+#Define input
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1386_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+White+meduCnbGo1+mprageMassICV+averageRating+goassessItemBifactor4FactorMood"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+#Call gam wrapper
+Rscript /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 5 -s 3.4
+
+
+#Alternative to qlogin
+qsub -V -S /share/apps/R/R-3.1.1/bin/Rscript -cwd -o ${logfile} -e ${errfile} -binding linear:5 -pe unihost 5 -l h_vmem=36.5G,s_vmem=36.0G /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 5 -s 3.4

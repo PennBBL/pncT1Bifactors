@@ -1,0 +1,95 @@
+#Copy and paste the following to the command line:
+#Open qlogin session (3 cores and 50.5 and 50G of memory seem to be needed to get this script to run)
+qloginp3 -l h_vmem=50.5G,s_vmem=50.0G
+
+
+###GAM###
+#Model with all covariates (N=1385)
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+white+meduCnbGo1+mprageMassICV+averageRating+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+#Model without race, momedu, and averageRating as covariates (N=1385)
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+mprageMassICV+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+
+#Model without race, momedu, and averageRating as covariates (N=1385)
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+mprageMassICV+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+
+#Model removing the 17 people missing medu data (leaving N=1368)
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1368_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+white+meduCnbGo1+mprageMassICV+averageRating+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+
+#Call gam wrapper
+Rscript /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4
+
+#Alternative to qlogin
+qsub -V -S /share/apps/R/R-3.1.1/bin/Rscript -cwd -o ${logfile} -e ${errfile} -binding linear:3 -pe unihost 3 -l h_vmem=50.5G,s_vmem=50.0G /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4
+
+
+###LINEAR###
+#Linear model with all covariates and bifactors
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~age+sex+ageSq+white+meduCnbGo1+mprageMassICV+averageRating+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+#Linear model with only OverallPsych bifactor and without race, momedu, or average rating covariates.
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716_ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~age+sex+ageSq+mprageMassICV+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/logs"
+
+
+#Call linear model wrapper (takes about one hour to finish)
+Rscript /data/joy/BBL/applications/groupAnalysis/lm_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4
+
+#Alternative to qlogin
+qsub -V -S /share/apps/R/R-3.1.1/bin/Rscript -cwd -o ${logfile} -e ${errfile} -binding linear:3 -pe unihost 3 -l h_vmem=50.5G,s_vmem=50.0G /data/joy/BBL/applications/groupAnalysis/lm_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4

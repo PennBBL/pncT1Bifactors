@@ -1,0 +1,49 @@
+####################################
+#### MATRIX REGRESSION ANALYSES ####
+####################################
+
+#Load libraries
+library(ANTsR)
+library(vegan)
+
+#Load in data
+subjData<-readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1368_MARS_datarel_020716_ravens.rds")
+images<- antsImageRead("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/n1368_RavensPath_ACROSS.INCLUDE_smooth3.4/fourd_4mm.nii.gz",4)
+mask<-antsImageRead("/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_4mm.nii.gz",3)
+tsMat<-timeseries2matrix(images,mask)
+bblids<-read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/results/n1368_RavensPath_ACROSS.INCLUDE_smooth3.4/bblids.csv",header=TRUE)
+
+#Make race and sex factors
+subjData$race<-as.factor(subjData$race)
+subjData$sex<-as.factor(subjData$sex)
+
+#Put bblids in order in subject data file and in bblids.txt
+subjData<-subjData[order(subjData$bblid),]
+bblids<-bblids[order(bblids$bblid),]
+
+#subset the data by these bblids (only necessary if the bblids.txt and subject level data file don't have the same N)
+#subjData<-subjData[ subjData$bblid %in% bblids$bblid,]
+
+#Calculate distances
+fracdistEuc <- vegdist(tsMat, method='euclidean')
+
+#Run models with adonis
+
+#Bifactor model with all covariates (age, sex, age squared, race, mom edu, ICV, and QA rating) and all bifactors.
+fracModel1<-adonis(fracdistEuc~age + sex + ageSq + white + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood + goassessItemBifactor4FactorPsych + goassessItemBifactor4FactorExt + goassessItemBifactor4FactorPhb + goassessItemBifactor4FactorOverallPsy,data=subjData)
+
+#Bifactor model with only select covariates (age, sex, age squared, ICV) and all bifactors.
+fracModel2<-adonis(fracdistEuc~age + sex + ageSq + mprageMassICV + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy,data=subjData)
+
+#Correlated traits model for Mood
+fracModel3<-adonis(fracdistEuc~age + sex + ageSq + white + meduCnbGo1 + mprageMassICV + averageRating + Mood,data=subjData)
+
+#Correlated traits model for Psychosis
+fracModel4<-adonis(fracdistEuc~age + sex + ageSq + white + meduCnbGo1 + mprageMassICV + averageRating + Psychosis,data=subjData)
+
+#Correlated traits model for Externalizing
+fracModel5<-adonis(fracdistEuc~age + sex + ageSq + white + meduCnbGo1 + mprageMassICV + averageRating + Externalizing,data=subjData)
+
+#Correlated traits model for Fear
+fracModel6<-adonis(fracdistEuc~age + sex + ageSq + white + meduCnbGo1 + mprageMassICV + averageRating + Fear,data=subjData)

@@ -1,0 +1,448 @@
+###############################################
+###### T1 Across Disorder Analysis Steps ######
+###############################################
+
+###################
+#### PREP DATA ####
+###################
+
+1. Use the script "AcrossDisorder_CtVol_JLF_dataPrep.R" to pre-process the data. This script will:
+   a. Load/merge all subject data files, apply T1 exclusion criteria, and remove the two subjects who are missing their bifactor scores.
+   b. Create variables for lobes.
+   c. Create diagnostic factor variables (1 for diagnosis, 0 for TD) in order to compute effect sizes later.
+   d. Save the subject-level rds file.
+   e. Subset the data to look at All Anxiety vs TD and Coarse Anxiety (OCD, PTSD, Anx) vs TD; save separately for anxiety only analyses.
+   f. Subset the data by 12 years and up; save the file separately for STAI analyses.
+   g. Subset the data by the additional voxelwise ASL exclusion criteria for voxelwise analyses.
+   h. Subset the voxelwise data by 11 years and up; save the file separately for proband analyses.
+   i. Subset the voxelwise data by sex; save males and females in separate files.
+   j. Subset the n1274 voxelwise data to remove those on psychoactive psychiatric meds (for sensitivity analyses, n=1135)
+   k. Subset the n1042 11 and up voxelwise data to remove those on psychoactive psychiatric meds (for sensitivity analyses, n=922)
+   l. Subset the n1042 11 and up voxelwise data to remove those not meeting restboldExclude criteria (n=833) for connectivity analyses.
+2. After this script is done running, check that the variables of interest (esp. pcaslRelMeanRMSMotion, restRelMeanRMSMotion) are numeric and not strings, since some variables have "NA" instead of "." for missing data, which R reads as a string variable.
+      is.numeric(subjData$age)
+      is.factor(subjData$sex)
+      is.numeric(subjData$pcaslRelMeanRMSMotion)
+      is.numeric(subjData$restRelMeanRMSMotion)
+      is.numeric(subjData$Bifactor_Mood)
+      is.numeric(subjData$Bifactor_Psychosis)
+      is.numeric(subjData$Bifactor_Externalizing)
+      is.numeric(subjData$Bifactor_Fear)
+      is.numeric(subjData$Bifactor_Overall_Psychopathology)
+
+
+1. Use the script "AcrossDisorder_JLF_dataPrep.R" to pre-process the data. This script will:
+   a. Load/merge all subject data files and apply vol, ct, and gmd exclusion criteria.
+   b. Create variables for lobes (for volume, cortical thickness, and GMD).
+   c. Create diagnostic factor variables (1 for diagnosis, 0 for TD) in order to compute effect sizes later.
+   d. Save the subject-level rds file.
+   e. Subset the data to look at All Anxiety vs TD and Coarse Anxiety (OCD, PTSD, Anx) vs TD; save separately for anxiety only analyses.
+   f. Subset the data by 12 years and up; save the file separately for STAI analyses.
+   g. Subset the data by 11 years and up; save the file separately for proband analyses.
+
+
+########################
+#### Run GAM Models ####
+########################
+
+1. Run the script, "AcrossDisorder_JLF_*_GamAnalyses.R" (there are several versions of this script for vol, ct, and gmd, each with and without TBV). This script will:
+   a. Run GAM models for JLF volume, JLF cortical thickness, or JLF GMD.
+      1. Samples used:
+      	 a. All Anxiety only (Agoraphobia, Gad, OCD, Panic, PTSD, Separation anxiety, Social anxiety, Specific Phobia)
+	 b. All Anxiety (Agoraphobia, Gad, OCD, Panic, PTSD, Separation anxiety, Social anxiety, Specific Phobia) and TD
+	 c. 12 and up sample (for STAI)
+	 d. 11 and up sample (proband)
+	 e. Full sample
+      2. Dependent variables:
+      	 a. GM/WM/CSF (only GM for CT and GMD)
+	 b. Lobes (no cerebellum for Vol, CT, or GMD; no subcortical for CT)
+	 c. ROIs
+      2. Independent variables:	
+      	 a. AllAnx vs. TD (AllAnx and TD sample only)
+	 b. Coarse Anxiety (PTSD and Anxiety) vs. TD (AllAnx and TD sample only)
+	 c. STAI
+	    1. State and Trait
+	    2. Trait alone
+	 d. Correlated traits (not age regressed)
+	 e. Psychopathology bifactor (not age regressed) 
+      3. Covariates: s(age) + sex + mprage_antsCT_vol_TBV (or No TBV)
+   b. FDR correct GAM model p-values.
+
+
+###########################################
+#### Effect Sizes, Tables, and Figures ####
+###########################################
+
+1. Run the script, "EffectSizes_TablesFigures.R" (or "EffectSizes_TablesFigures_NoTBV.R") to:
+   a. Calculate means, sds, percentage of females, percentage of white, and Ns for all diagnoses.
+   b. Create Table1 (demographics by screening diagnosis category)
+   c. Create Figure1 (bifactors by screening diagnosis category)
+   d. Subset the data for each diagnosis with N>20.
+      1. Run the linear models with lsmeans to get covariate-adjusted means (NOTE: lsmeans won't run with a GAM model)
+      	 a. If lsmeans is not installed, then use this command: install.packages("lsmeans", repos="http://R-Forge.R-project.org")
+      2. Compute covariate-adjusted effect sizes (Cohens d).
+   e. Create Figure2 (Effect sizes in lobes by screening diagnosis)
+2. To create Figure3 (Bifactor score by lobe volume), use the script "Fig3.R".
+
+
+###################################
+#### Voxelwise Volume Analyses ####
+###################################
+
+GAM Voxelwise Wikipedia: https://github.com/PennBBL/groupAnalysis/wiki/Gam_Voxelwise
+
+1. Create a list of bblids and scanids using script, "Get_bblids.R".
+
+2. Run the script, "FindMissingCT.sh".
+   a. This script will create a list of bblids and scanids that are missing their CT file:
+      /data/joy/BBL/studies/pnc/n1601_dataFreeze2016/n1601_voxelwiseMaps/antsCt/*_CorticalThicknessNormalizedToTemplate2mm.nii.gz 
+   b. NOTE: there was no missing data for our sample
+
+3. Create an .Rds file containing paths to each subject's Ravens image using the script, "GetRavensPaths.sh".
+   a. This script will create a file of Ravens paths called "n1385_RavensPaths.csv".
+      
+4. Use script, "MergeRavens.R" to merge the ravens paths into the subject-level rds file and save.
+
+5. To run the GAM or linear voxelwise wrapper:
+   a. See file "Run_Voxelwise_wrapper" for commands
+      1. Open a qlogin session (3 cores and 50.5 and 50G of memory seem to be needed to get this script to run; takes 4-5 hours to finish)
+      	      qloginp3 -l h_vmem=50.5G,s_vmem=50.0G
+      2. Define the input (see wrapper file)
+      3. Run the GAM wrapper with qlogin
+   b. Alternatively, you could use qsub to run the script
+
+(6.) OPTIONAL: Apply FDR correction (NOTE: the gam wrapper can apply FDR correction, if requested).
+    a. Apply FDR correction to results using fsl utility "fdr"
+    a. copy the script "FDR_correction.sh" to the results folder
+    b. cd to the results folder 
+    c. create a list of the gamP* filenames:
+       ls gamP* > filenames.txt
+       or
+       ls lmP* > filenames.txt
+    d. Double check that the path name to the results folder is correct in the script "FDR_correction.sh"; this script will
+       1. Output the probability threshold (this tells you the FDR threshold; p-values below that threshold are significant)
+       2. Calculate 1 minus the FDR threshold
+       3. Create an FDR corrected image using the 1-FDR threshold for ease of display
+    e. View the results
+       1. Open the z-map in fslview using the following standard image:
+       /data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_2mm.nii.gz
+       2. Critical z-values and corresponding p-values (one-tail):
+       	  a. z=1.645 p=.05
+	  b. z=1.96  p=.025
+	  c. z=2.33  p=.01
+	  d. z=2.58  p=.005
+	  e. z=3.09  p=.001
+       3. Or to see the FDR corrected results, open the thresh_fdr_1minusP_gamP_*.nii.gz file on the same standard image as above.
+          a. This map only shows the regions that survive FDR correction. 
+
+
+######################
+#### NMF ANALYSES ####
+######################
+1. Get the bblids and scanids for the CT, GMD, and volume (Ravens) data (n=1375) using the script "Get_bblids_scanids.R".
+2. Look for missing data using the script "FindMissingCtGmdVol.sh".
+3. Smooth the CT, GMD, and volume (Ravens) data and save the filenames into text files for zipping the data using the script, "Smooth_CtGmdVol.sh".
+   a. To check that the correct number of smoothed files are in the directory: ls -1 | wc -l
+4. Zip the files using the script "ZipFiles.sh".
+5. Then copy them to CBICA
+      ssh kaczkura@cbica-cluster.uphs.upenn.edu
+      sudo -u pncnmf sudosh
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/images/antsCT/n1375_antsCt_data.tar.gz /cbica/projects/pncNmf/n1375_t1NMF/antsCT/antsCT_datafiles
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/images/GMD/n1375_GMD_data.tar.gz /cbica/projects/pncNmf/n1375_t1NMF/GMD/GMD_datafiles
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/images/Ravens/n1375_Ravens_data.tar.gz /cbica/projects/pncNmf/n1375_t1NMF/Ravens/Ravens_datafiles
+6. Extract the files (can also delete the tar file)
+      tar -xvf n1375_antsCt_data.tar.gz
+      rm n1375_antsCt_data.tar.gz
+      ls -1 | wc -l
+7. Permissions
+      1. Allow others permission to access the directory:
+      chmod 777 antsCT
+8. Copy the list of bblids and scanids from chead to cbica.
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1375_bblids_scanids.csv /cbica/projects/pncNmf/n1375_t1NMF
+9. Create a text file with the image paths on CBICA. See script "GetFilePaths.sh" on cbica.
+10. Copy the cortical (for CT) and cortical_subcortical (for GMD and Ravens) masks from chead to cbica
+      ssh kaczkura@cbica-cluster.uphs.upenn.edu
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/masks/corticalGM_mask.nii.gz /cbica/projects/pncNmf/n1375_t1NMF
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder/masks/corticalSubcortical_mask.nii.gz /cbica/projects/pncNmf/n1375_t1NMF
+11. Run the sge commands for submit_script_extractBasesMT.sh using the following script "Run_NMF.sh" to set up and run this script for different numbers of components.
+    a. Be sure to check that the output directory for the error files is correctly specified in submit_script_extractBasesMT.sh.
+12. Calculate reconstruction error:
+    a. After running a range of components (2-30, evens), you need to calculate the reconstruction error to help you to determine the ideal number of components to use.
+         ssh -Y kaczkura@cbica-cluster.uphs.upenn.edu
+         cd pncT1AcrossDisorder/NMF/scripts/
+         matlab -nodesktop
+         addpath('/sbia/sbiasfw/external/matlab/extras/nifti/20130306/')
+         calcRecError_nassarPrematurity
+   b. The script will run for a few minutes and then the reconstruction error figures should pop up. Take screen shots to save.
+   c. We calculate the reconstruction error as the Frobenius between the data and the estimated non-negative approximation. At the end, two figures are produced. The first gives the reconstruction error as a function of the estimated number of components, while the second one gives its gradient. Look at the gradient plot (the one increasing): the aim is to find the "elbow" of the plot, ie, when the change seems to saturate. This is your ideal number of components.
+13. Once you've decided on the ideal component number, update the script "formatNmfData.m" to convert the .mat output to .csv where each component equals one column (the output will be in sge_job_output/NumBases18/OPNMF).
+    cd /cbica/home/kaczkura/pncT1AcrossDisorder/NMF/scripts
+    matlab -nodesktop
+    formatNmfData
+    exit
+14. Add bblid names to the .csv file 
+    a. Aris says it is safe to assume that the output file is in the exact same order as the bblid list used to run NMF. 
+       1. Use cbind to combine the bblids and results using the script "Add_bblids.R".
+15. Look at the results
+    cd /cbica/home/sattertt/n279_pnc_Ravens_nassarPrematurity/sge_job_output
+	  fslview /cbica/home/kaczkura/pncAslAcrossDisorder/NMF/images/pnc_template_brain_2mm.nii.gz $(for i in {1..22}; do echo `ls NumBases22/OPNMF/niiImg/Basis_${i}.nii ` -b 0.004,0.04 -l Hot ; done) &
+
+
+######################################################
+#### MAKE PUBLICATION QUALITY NMF IMAGES IN CARET ####
+######################################################
+
+1. Zip the NMF component files
+    ssh kaczkura@cbica-cluster.uphs.upenn.edu
+    sudo -u pncnmf sudosh
+    cd /cbica/projects/pncNmf/n282_preterm/results/NumBases26/OPNMF/niiImg
+    tar -cvf NMF26components.tar.gz Basis_* 
+
+2. Copy the files to chead
+    scp -r NMF26components.tar.gz akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncPreterm/results 
+
+3. Unzip the files
+    tar -xvf NMF26components.tar.gz
+
+4. Warp your NMF component .nii files into MNI space for caret:
+   a. Use the script "WarpEachToMNI.sh"
+ 
+5. Use sftp to download the MNI space files to the local computer (the files will be in Machintosh HD/Users/antoniak or look for them in "All My Files").
+    get /data/joy/BBL/projects/pncPreterm/results/EachComponentWarpedToMNI/NMF*
+
+6. Open Caret (Applications/caret/bin_macosx64/caret5)
+   a. If opening a spec file for the first time:
+      1. Go to File -> Open Spec file...
+      2. Computer/Applications/caret/data_files/standard_mesh_atlases/standard_mesh_atlases_TED/Human.PALS.LEFT
+      3. Load
+   b. Or if you have already opened a spec file before: 
+      1. File -> Open recent Spec file -> /standard_mesh_atlases_TED/Human.PALS.LEFT
+      2. Load
+   c. Go to Attributes -> Map volume(s) to surface(s)
+      1. Choose Metric -> Next
+      2. Add Volume from disk
+      	 a. Navigate to where you saved the NMF nii files
+	 b. Choose the NMF_1.nii file
+	 c. Open
+	 d. Next
+      3. Map to caret with atlas
+      	 a. Space: Choose FLIRT
+      	 b. Atlas: Choose the hemisphere that matches the spec file you loaded (LEFT hemisphere). 
+	 c. Only select "Show Mapping to Average Fiducial Surface" (the first button).
+	 d. Okay
+	 e. Next
+      4. Data File naming 
+         a. Don't change anything
+      	 b. Next
+      5. Mapping Algorithm
+      	 a. Choose: METRIC_MAXIMUM_VOXEL
+	 b. Next
+	 c. Finish
+   	 d. Wait for the summary box to appear. Close.
+   d. On the caret diaglog box:
+      1. Click on D/C
+      2. Primary Overlay, Data type: Choose Metric.
+      3. Use the M and L buttons at the top of the screen to switch views quickly.
+      4. Use command+shift+4 to take a screen shot. Rename the screen shot NMF1.png.
+      5. For the composite image only (): At the top of the D/C page, change Page Selection to Metric Settings
+      	 a. Click on User scale, make Pos Min/Max = 3.09 and 4.00
+	 b. Choose Positive only under
+	 c. Click on show bar
+
+
+#######################################################
+#### MAKE A SINGLE FIGURE WITH ALL NMF COMPONENTS ####
+#######################################################
+
+1. Threshold and binarize each image using the script "ThresholdBinarizeNMF.sh". This script will:
+   a. Threshold each Basis_*.nii image output from the NMF analyses at .004 (this threshold value was recommended by Aris).
+   b. Binarize these thresholded images and save separately.
+   c. This has to be done separately because we need both thresholded only images and thresholded/binarized images.
+   
+2. Remove small clusters
+   a. Use Adon’s matlab code to remove small clusters. 
+      1. Copy the function "returnNumberOfNeighboorhoods" from scripts/ to your results folder /Threshold004Bin
+      2. The input needs to be the thresholded (.004) and binarized images.
+      3. You have to try several different thresholds to make sure it’s not cutting out the main clusters (200, 300, anf 400 are reasonable to try). 
+         a. I ultimately went with 400, consistent with Marieta's CT study.
+      4. This produces a binary mask with the remaining clusters
+      
+      matlab -nodisplay -nojvm -r "returnNumberOfNeighboorhoods('./Basis_1_thr004Bin.nii.gz', 400); exit;"
+      
+      5. mkdir NeighborThresh400 and move the images into this folder
+3. Mask the thresholded (.004) images by the masks you just created using the script "MaskByNeighborThr400.sh".
+4. Warp the masked image into 2mm MNI space for loading in caret using the script "WarpThr400ToMNI.sh".
+5. Merge all NMF component images into a single image using script "MergeNMFcomponents.sh".
+6. Warp and binarize the mask using the script "WarpBinMask.sh".
+7. Use the script "CompositeNmfBrainImage.R" to assigning a p-value or t-value to each component for loading into caret.
+   a. NOTE: You will need to run the script "GamAnalyses.R" to get the t-values for each significant NMF component you want to plot.
+8. Load the file "NMF_nassarPrematurity_gaFDRresultsOnly.nii.gz" in caret as above.
+
+
+######################
+#### SVR ANALYSES ####
+######################
+
+1. Use the script "SVR_analyses.R" to run SVR analyses on the MARS volume data.
+    a. This script will:
+       1. Regress covariates out of the predicted variable (goassessItemBifactor4FactorOverallPsy)
+       2. Regress covariates out of volumetric MARS data
+       3. Define a function to run 10 fold SVR
+       4. Run the models
+       5. Calculate the correlation between predicted overall psych from SVR and actual overallPsych
+       	  a. We want a correlation of at least .2 before proceeding.
+
+
+###########################
+#### MATRIX REGRESSION ####
+###########################
+
+1. Use the script "MatrixRegressionAnalyses.R" to run matrix regression on the MARS volume data.
+    a. Before running this script, you need to make sure you have the following:
+       1. A subject level data file.
+       2. A fourd_4mm.nii.gz file
+       	  a. To get this file, you can just downsample the fourd.nii.gz file (which is already 2mm) that outputs with the gam and linear wrappers.
+	          fslmaths fourd.nii.gz -subsamp2 fourd_4mm.nii.gz
+       3. A bblids.csv list with a header "bblid"
+       	  a. Just save the bblid.csv file that outputs with the gam and linear wrappers as bblids.csv with the header "bblid".
+       4. A mask (we used the mask: /data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_4mm.nii.gz). To get 4mm mask:
+       	    	 fslmaths dramms_ravens_template_mask_2mm.nii.gz -subsamp2 -thr 0.05 -bin dramms_ravens_template_mask_4mm.nii.gz
+       NOTE: THE ORDER OF SUBJECTS MUST BE IDENTICAL IN THE BBLIDS.CSV FILE AND THE FOURD.NII.GZ FILE
+    b. This script will:
+       1. Load the file and calcuate the euclidean distances.  
+       2. Run models with adonis = analysis of variance using distance matrices; runs linear models; takes about an hour to run.
+       	  a. For partitioning distance matrices among sources of variation and fitting linear models (e.g., factors, polynomial regression) to distance matrices; uses a permutation test with pseudo-F ratios.
+
+
+###############
+#### MIDAS ####
+###############
+
+1. MIDAS detects multivariate neuroimaging patterns related to a continuous subject-level variable.
+    a. First, need to gain access to CBICA (ask Ted to submit request for you; need a uphs username and password).	
+
+    b. Next, need to copy Ravens data to CBICA. 
+       1. Make temporary directory on chead:
+       	  ssh chead
+	  cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin
+	  mkdir tmpRavensSymLink
+       2. Use sym link to copy links to the data into your temp folder (takes about 10-15 minutes to run).
+       	  a. This will only copy the 1385 subjects in our sample.
+	  b. SymLink takes up less space than actually copying the data files.
+       	     cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/pncT1AcrossDisorderScripts
+	     ./SymLink.sh
+       3. ssh to CBICA and copy the folder (takes a while):
+       	  ssh kaczkura@cbica-cluster.uphs.upenn.edu
+	  scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/tmpRavensSymLink /cbica/home/kaczkura/t1Factors/images
+
+    c. Use the script, "prepareDataForMidas.R" on chead to set up the subject data file for MIDAS. 
+       1. This script will:
+       	  a. Load the subject-level data.
+       	  b. Make sex and white = 0 or 1.
+	  c. Change the RavensPaths from chead paths to cbica paths.
+       	  d. Subset the data to only the variables used in MIDAS (NOTE: cbicaRavensPath should be the first variable in the .csv file).
+       	  e. Save the file on chead.
+
+    d. Copy the MIDAS data file to cbica:
+       cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData
+       scp "n1385_MARS_datarel_020716_ravens_MIDAS.csv" kaczkura@cbica-cluster.uphs.upenn.edu:/cbica/home/kaczkura/t1Factors/subjectData
+
+    e. Copy the Ravens template to CBICA (for use by mat2nii later):
+       cd /data/joy/BBL/templates/pncRavensTemplate/
+       scp "dramms_ravens_template_2mm.nii.gz" kaczkura@cbica-cluster.uphs.upenn.edu:/cbica/home/kaczkura/t1Factors/images/
+
+    f. Change the permissions of all files in the temp directory to be very liberal.
+       cd /cbica/home/kaczkura/t1Factors/images
+       chmod -R 777 tmpRavensSymLink/
+
+    g. Run MIDAS with the following command (takes about an hour to an hour and half to run): 
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age, sexInd, ageSq, whiteInd, meduCnbGo1, mprageMassICV, averageRating, goassessItemBifactor4FactorMood, goassessItemBifactor4FactorPsych, goassessItemBifactor4FactorExt, goassessItemBifactor4FactorPhb, goassessItemBifactor4FactorOverallPsy
+
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_ageOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age
+
+qsub-run --sge '-l h_vmem=80G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_ageOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age
+
+
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_OverallOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age, sexInd, mprageMassICV, goassessItemBifactor4FactorOverallPsy
+
+    h. Or you can use smoothed, masked data. Use the chead script "Smooth_Mask_Ravens.sh" to:
+      1. Smooth the unsmoothed Ravens data at 2mm FHWM and mask the smoothed data using your template-space GM mask.
+      2. SymLink the data to CBICA and rerun MIDAS.
+
+    i. The output is called "output.mat" in the output folder
+       1. The function "mat2nii" will convert the mat file to a nifti file. 
+       	  a. The output.mat file is structured such that map.p{1} are the p-values for the statistical test related to the first covariate you supplied, 
+	     map.p{2} are the p-values for the 2nd covariate, etc.
+	  b. Likewise, map.stat{1} is the midas statistic for the regression with respect to the first covariate, and map.stat{2} is the one for the 2nd covariate, etc 
+	     	1. This variable shows direction (negative or positive with respect to the covariate).
+	  c. To save each covariate's p-values in matlab:
+	     cd /cbica/home/kaczkura/t1Factors/scripts/midas
+             matlab -nodesktop
+	     load('/cbica/home/kaczkura/t1Factors/output/output.mat') 
+	     mat2nii(map.p{1}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_age')	     
+	     mat2nii(map.p{2}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_sexInd')
+	     mat2nii(map.p{3}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_ageSq')
+	     mat2nii(map.p{4}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_whiteInd')
+	     mat2nii(map.p{5}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_meduCnbGo1')
+	     mat2nii(map.p{6}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_mprageMassICV')
+	     mat2nii(map.p{7}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_averageRating')
+	     mat2nii(map.p{8}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorMood')
+	     mat2nii(map.p{9}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorPsych')
+	     mat2nii(map.p{10}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorExt')
+	     mat2nii(map.p{11}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorPhb')
+	     mat2nii(map.p{12}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorOverallPsy')
+	  d. Do the same for the stats 
+	     mat2nii(map.stat{1}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_age')
+             mat2nii(map.stat{2}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_sexInd')
+             mat2nii(map.stat{3}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_ageSq')
+             mat2nii(map.stat{4}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_whiteInd')
+             mat2nii(map.stat{5}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_meduCnbGo1')
+             mat2nii(map.stat{6}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_mprageMassICV')
+             mat2nii(map.stat{7}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_averageRating')
+             mat2nii(map.stat{8}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorMood')
+             mat2nii(map.stat{9}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorPsych')
+             mat2nii(map.stat{10}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorExt')
+             mat2nii(map.stat{11}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorPhb')
+             mat2nii(map.stat{12}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorOverallPsy')
+
+
+##############
+#### MISC ####
+##############
+
+A. To create plots of the cortical thickness data by age (to make sure data looks okay), use script, "CT_Figures.R"
+
+B. To make correlation tables for CT total and lobes vs correlated traits and bifactors, use script "CorrMatrix.R". 
+
+C. Merge the CT images into a 4d file for Tyler.
+   1. Use script, "GetCtPathsWithScanids.sh" to get the scanids and image paths for the 2mm CT images in the data freeze folder.
+   2. Use script, "MergeCTPaths.R" to merge these ct paths with the subject level data file.
+   3. Run the voxelwise gam wrapper to get the merged fourd file of images.
+   4. Use the script "NIFTI_to_Rdata.R" to:
+      a. Read the fourd images into R using antsR
+      b. Transform them to a matrix using timeseries2matrix
+      c. Save the ouput as an Rdata file
+
+D. Make a list of bblids who are 12 and up for Tyler to use to make STAI factor scores (script "GetStai_bblids.R").
+
+E. Make CT mask
+   1. If you haven't already done so, use the script "Get_bblids.R" to create the list of bblids and scanids for your sample.
+   2. Then create a .txt file with just the paths (no bblids or scanids) to the data freeze CT images using the script "GetCtPaths.sh".
+   3. Use the script "MakeCtMask.sh" to create masks for each image while thresholding to remove those with too many 0s, then average those masks together and 
+
+F. Downsample 1mm images to 2mm using script "downsampleAntsCt.sh" in Old/ folder (also requires get "GetCtPaths.sh"). 
+
+G. To rename files in a directory (cbica):
+
+rename _RAVENS_2GM_2mm_smoothed_0.85sigma.nii.gz _RAVENS_2GM_2mm_smoothed0.85sigma.nii.gz *_RAVENS_2GM_2mm_smoothed_0.85sigma.nii.gz
+
+H. Zip only certain files in a directory using a .csv list of files
+    cd /data/joy/BBL/studies/pnc/n1601_dataFreeze2016/neuroimaging/t1struct/voxelwiseMaps_ravens/
+    tar -cvf /data/joy/BBL/projects/pncT1AcrossDisorder/images/Ravens_nassarPrematurity.tar.gz -T /data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n279_nassarPrematurity_FileNames.csv
+
+I. To print p-values to 3 decimal places: round(pvaluesfull.nmf_noTBV,3)
+
+OTHER:
+lapply(dataGMDGm, mode)
+x<-lapply(Agr_GmWmModels_vol, summary)
+test<-lapply(Agr_GmWmModels_vol, lsmeans)

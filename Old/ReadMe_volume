@@ -1,0 +1,292 @@
+###############################################
+###### T1 Across Disorder Analysis Steps ######
+###############################################
+
+###################
+#### PREP DATA ####
+###################
+
+1. Use the script "AcrossDisorder_JLF_dataPrep.R" to pre-process the data. This script will:
+   a. Load/merge all subject data files and apply vol, ct, and gmd exclusion criteria.
+   b. Create variables for lobes (for volume, cortical thickness, and GMD).
+   c. Create diagnostic factor variables (1 for diagnosis, 0 for TD) in order to compute effect sizes later.
+   d. Create factors variables and subset the data to look at All Anxiety vs TD and Coarse Anxiety (OCD, PTSD, Anx) vs TD.
+   e. Apply the ASL exclusion criteria and save the file separately for ASL analyses.
+   f. Apply the 12 and up exclusion criteria (for STAI) and save the file separately for STAI analyses.
+   g. Save the subject-level RDS files.
+
+
+########################
+#### Run GAM Models ####
+########################
+
+1. Run the script, "AcrossDisorder_JLF_*_GamAnalyses.R" (there are several versions of this script for vol, ct, and gmd, each with and without TBV). This script will:
+   a. Run GAM models for JLF volume, JLF cortical thickness, or JLF GMD.
+      1. Dependent variables: GM/WM/CSF (of just GM for CT and GMD), Lobes (no subcortical for CT), or ROIs
+      2. Independent variables: correlated traits (not age regressed) or psychopathology bifactor (not age regressed) 
+      3. Covariates: s(age) + sex + mprage_antsCT_vol_TBV (or No TBV)
+   b. FDR correct GAM model p-values.
+
+
+###########################################
+#### Effect Sizes, Tables, and Figures ####
+###########################################
+
+1. Run the script, "EffectSizes_TablesFigures.R" to:
+   a. Make variables where 1 = diagnosis; calculates means, sds, percentage of females, percentage of white, and Ns for all diagnoses.
+   b. Define Typically Developing as the reference group and save the file as "n1359_JLF_subjData_diag.rds"
+   c. Create Table1 (demographics by screening diagnosis category)
+   d. Create Figure1 (bifactors by screening diagnosis category)
+   e. Subset the data for each diagnosis with N>20.
+      1. Run the linear models with lsmeans to get covariate-adjusted means (NOTE: lsmeans won't run with a GAM model)
+      	 a. If lsmeans is not installed, then use this command: install.packages("lsmeans", repos="http://R-Forge.R-project.org")
+      2. Compute covariate-adjusted effect sizes (Cohens d).
+   f. Create Figure2 (Effect sizes in lobes by screening diagnosis)
+2. To create Figure3 (Bifactor score by lobe volume), use the script "Fig3.R".
+
+
+###################################
+#### Voxelwise Volume Analyses ####
+###################################
+
+GAM Voxelwise Wikipedia: https://github.com/PennBBL/groupAnalysis/wiki/Gam_Voxelwise
+
+1. Create a list of bblids, scanids, and dates using script, "Get_bblids.R".
+
+2. Run the script, "FindMissingRavens.sh".
+   a. This script will create lists of bblids that are missing either: 
+        1. a subject data Ravens folder on chead, 
+        2. the appropriate scanid folder on chead, 
+        3. the *150.nii.gz Ravens file on chead, or 
+        4. the *150_2mm.nii.gz Ravens file on chead. 
+   b. If the subject is missing a Ravens data folder on chead, the script will make one.
+   c. If the subject is missing the appropriate scanid folder on chead, the script will make it.
+   d. Then it will copy "Missing150.csv" to monstrum for the next step.
+        NOTE: 4 subjects in our subsample were missing the 150.nii.gz file (which is also not on monstrum); these subjects were removed from analyses.
+
+3. For those missing *150.nii.gz and *150_2mm.nii.gz Ravens data on chead, copy the files from monstrum
+   a. Need to run the script from monstrum, not chead (NOTE: You will have to enter your password for every file you copy over).
+      	   cd /import/monstrum/Users/antoniak/PNC_MDD/scripts
+      	   ./CopyRavens.sh
+   b. You can run the script "DoubleCheckMissingRavens.sh" on chead to double check that no one is missing their Ravens folders or files (the output bblid lists should be empty).
+        1. If subjects who passed QA are missing their *150.nii.gz Ravens file, let Ted know (the *150.nii.gz file is necessary for creating the downsampled *150_2mm.nii.gz file).
+
+4. If subjects are missing their *150_2mm.nii.gz Ravens file (but have their *150.nii.gz file), use fslmaths to generate the 2mm Ravens file.
+   a. cd to subject's ravens directory
+      	  fslmaths fileName_150.nii.gz -subsamp2 newName_150_2mm.nii.gz
+   b. If you get the message "Error: failed to open file" then you don't have permission to write in the file (let Ted know).
+
+5. Create an .Rds file containing paths to each subject's Ravens image using the script, "GetRavensPaths.sh".
+   a. This script will create a file of Ravens paths called "n1385_RavensPaths.csv".
+      
+6. Use script, "MergeRavens.R" to merge the ravens paths into the subject-level rds file and save.
+
+7. To run the GAM or linear voxelwise wrapper:
+   a. See file "Run_Voxelwise_wrapper" for commands
+      1. Open a qlogin session (3 cores and 50.5 and 50G of memory seem to be needed to get this script to run; takes 4-5 hours to finish)
+      	      qloginp3 -l h_vmem=50.5G,s_vmem=50.0G
+      2. Define the input (see wrapper file)
+      3. Run the GAM wrapper with qlogin
+   b. Alternatively, you could use qsub to run the script
+
+(8.) OPTIONAL: Apply FDR correction (NOTE: the gam wrapper can apply FDR correction, if requested).
+    a. Apply FDR correction to results using fsl utility "fdr"
+    a. copy the script "FDR_correction.sh" to the results folder
+    b. cd to the results folder 
+    c. create a list of the gamP* filenames:
+       ls gamP* > filenames.txt
+       or
+       ls lmP* > filenames.txt
+    d. Double check that the path name to the results folder is correct in the script "FDR_correction.sh"; this script will
+       1. Output the probability threshold (this tells you the FDR threshold; p-values below that threshold are significant)
+       2. Calculate 1 minus the FDR threshold
+       3. Create an FDR corrected image using the 1-FDR threshold for ease of display
+    e. View the results
+       1. Open the z-map in fslview using the following standard image:
+       /data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_2mm.nii.gz
+       2. Critical z-values and corresponding p-values (one-tail):
+       	  a. z=1.645 p=.05
+	  b. z=1.96  p=.025
+	  c. z=2.33  p=.01
+	  d. z=2.58  p=.005
+	  e. z=3.09  p=.001
+       3. Or to see the FDR corrected results, open the thresh_fdr_1minusP_gamP_*.nii.gz file on the same standard image as above.
+          a. This map only shows the regions that survive FDR correction. 
+
+
+######################
+#### NMF ANALYSES ####
+######################
+
+1. Use the script "Get_bblids.R" to create a list of bblids, scanids, and dates for the n1359 sample.
+   a. This sample passed volume and cortical thickness quality assurance and excludes those with health problems.
+2. Use the script "GetCtPaths.sh" to create a text file of the antsCT 1mm image paths.
+3. Downsample the 1mm files into 2mm files using the script, "downsampleAntsCt.sh".
+4. Move the files to CBICA
+   a. First zip the files in the images folder:
+      tar -zcvf antsCtDownsampled.tar.gz antsCtDownsampled/
+   b. Then copy them to CBICA
+      ssh kaczkura@cbica-cluster.uphs.upenn.edu
+      scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder_VolCT/images/antsCtDownsampled.tar.gz /cbica/home/sattertt/n1379_pnc_antsCt_2mm
+   c. Extract the files
+      tar -xvf antsCtDownsampled.tar.gz
+   d. Permissions
+      1. If you need to allow others permission to access the directory, use:
+      chmod 777 antsCtDownsampled
+5. Create a text file with the image paths on CBICA.
+      printf '%s\n' "$PWD"/* >n1359_antsCt2mmImages.txt
+6. Create the mask
+   a. 
+
+
+
+######################
+#### SVR ANALYSES ####
+######################
+
+1. Use the script "SVR_analyses.R" to run SVR analyses on the MARS volume data.
+    a. This script will:
+       1. Regress covariates out of the predicted variable (goassessItemBifactor4FactorOverallPsy)
+       2. Regress covariates out of volumetric MARS data
+       3. Define a function to run 10 fold SVR
+       4. Run the models
+       5. Calculate the correlation between predicted overall psych from SVR and actual overallPsych
+       	  a. We want a correlation of at least .2 before proceeding.
+
+
+###########################
+#### MATRIX REGRESSION ####
+###########################
+
+1. Use the script "MatrixRegressionAnalyses.R" to run matrix regression on the MARS volume data.
+    a. Before running this script, you need to make sure you have the following:
+       1. A subject level data file.
+       2. A fourd_4mm.nii.gz file
+       	  a. To get this file, you can just downsample the fourd.nii.gz file (which is already 2mm) that outputs with the gam and linear wrappers.
+	          fslmaths fourd.nii.gz -subsamp2 fourd_4mm.nii.gz
+       3. A bblids.csv list with a header "bblid"
+       	  a. Just save the bblid.csv file that outputs with the gam and linear wrappers as bblids.csv with the header "bblid".
+       4. A mask (we used the mask: /data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_4mm.nii.gz). To get 4mm mask:
+       	    	 fslmaths dramms_ravens_template_mask_2mm.nii.gz -subsamp2 -thr 0.05 -bin dramms_ravens_template_mask_4mm.nii.gz
+       NOTE: THE ORDER OF SUBJECTS MUST BE IDENTICAL IN THE BBLIDS.CSV FILE AND THE FOURD.NII.GZ FILE
+    b. This script will:
+       1. Load the file and calcuate the euclidean distances.  
+       2. Run models with adonis = analysis of variance using distance matrices; runs linear models; takes about an hour to run.
+       	  a. For partitioning distance matrices among sources of variation and fitting linear models (e.g., factors, polynomial regression) to distance matrices; uses a permutation test with pseudo-F ratios.
+
+
+###############
+#### MIDAS ####
+###############
+
+1. MIDAS detects multivariate neuroimaging patterns related to a continuous subject-level variable.
+    a. First, need to gain access to CBICA (ask Ted to submit request for you; need a uphs username and password).	
+
+    b. Next, need to copy Ravens data to CBICA. 
+       1. Make temporary directory on chead:
+       	  ssh chead
+	  cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin
+	  mkdir tmpRavensSymLink
+       2. Use sym link to copy links to the data into your temp folder (takes about 10-15 minutes to run).
+       	  a. This will only copy the 1385 subjects in our sample.
+	  b. SymLink takes up less space than actually copying the data files.
+       	     cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/pncT1AcrossDisorderScripts
+	     ./SymLink.sh
+       3. ssh to CBICA and copy the folder (takes a while):
+       	  ssh kaczkura@cbica-cluster.uphs.upenn.edu
+	  scp -r akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/tmpRavensSymLink /cbica/home/kaczkura/t1Factors/images
+
+    c. Use the script, "prepareDataForMidas.R" on chead to set up the subject data file for MIDAS. 
+       1. This script will:
+       	  a. Load the subject-level data.
+       	  b. Make sex and white = 0 or 1.
+	  c. Change the RavensPaths from chead paths to cbica paths.
+       	  d. Subset the data to only the variables used in MIDAS (NOTE: cbicaRavensPath should be the first variable in the .csv file).
+       	  e. Save the file on chead.
+
+    d. Copy the MIDAS data file to cbica:
+       cd /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData
+       scp "n1385_MARS_datarel_020716_ravens_MIDAS.csv" kaczkura@cbica-cluster.uphs.upenn.edu:/cbica/home/kaczkura/t1Factors/subjectData
+
+    e. Copy the Ravens template to CBICA (for use by mat2nii later):
+       cd /data/joy/BBL/templates/pncRavensTemplate/
+       scp "dramms_ravens_template_2mm.nii.gz" kaczkura@cbica-cluster.uphs.upenn.edu:/cbica/home/kaczkura/t1Factors/images/
+
+    f. Change the permissions of all files in the temp directory to be very liberal.
+       cd /cbica/home/kaczkura/t1Factors/images
+       chmod -R 777 tmpRavensSymLink/
+
+    g. Run MIDAS with the following command (takes about an hour to an hour and half to run): 
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age, sexInd, ageSq, whiteInd, meduCnbGo1, mprageMassICV, averageRating, goassessItemBifactor4FactorMood, goassessItemBifactor4FactorPsych, goassessItemBifactor4FactorExt, goassessItemBifactor4FactorPhb, goassessItemBifactor4FactorOverallPsy
+
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_ageOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age
+
+qsub-run --sge '-l h_vmem=80G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_ageOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age
+
+
+qsub-run --sge '-l h_vmem=75G' ./midas_script.sh -d /cbica/home/kaczkura/t1Factors/subjectData/n1385_MARS_datarel_020716_ravens_MIDAS_OverallOnly.csv -o /cbica/home/kaczkura/t1Factors/output -g cbicaRavensPath, age, sexInd, mprageMassICV, goassessItemBifactor4FactorOverallPsy
+
+    h. Or you can use smoothed, masked data. Use the chead script "Smooth_Mask_Ravens.sh" to:
+      1. Smooth the unsmoothed Ravens data at 2mm FHWM and mask the smoothed data using your template-space GM mask.
+      2. SymLink the data to CBICA and rerun MIDAS.
+
+    i. The output is called "output.mat" in the output folder
+       1. The function "mat2nii" will convert the mat file to a nifti file. 
+       	  a. The output.mat file is structured such that map.p{1} are the p-values for the statistical test related to the first covariate you supplied, 
+	     map.p{2} are the p-values for the 2nd covariate, etc.
+	  b. Likewise, map.stat{1} is the midas statistic for the regression with respect to the first covariate, and map.stat{2} is the one for the 2nd covariate, etc 
+	     	1. This variable shows direction (negative or positive with respect to the covariate).
+	  c. To save each covariate's p-values in matlab:
+	     cd /cbica/home/kaczkura/t1Factors/scripts/midas
+             matlab -nodesktop
+	     load('/cbica/home/kaczkura/t1Factors/output/output.mat') 
+	     mat2nii(map.p{1}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_age')	     
+	     mat2nii(map.p{2}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_sexInd')
+	     mat2nii(map.p{3}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_ageSq')
+	     mat2nii(map.p{4}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_whiteInd')
+	     mat2nii(map.p{5}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_meduCnbGo1')
+	     mat2nii(map.p{6}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_mprageMassICV')
+	     mat2nii(map.p{7}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_averageRating')
+	     mat2nii(map.p{8}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorMood')
+	     mat2nii(map.p{9}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorPsych')
+	     mat2nii(map.p{10}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorExt')
+	     mat2nii(map.p{11}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorPhb')
+	     mat2nii(map.p{12}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'p_goassessItemBifactor4FactorOverallPsy')
+	  d. Do the same for the stats 
+	     mat2nii(map.stat{1}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_age')
+             mat2nii(map.stat{2}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_sexInd')
+             mat2nii(map.stat{3}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_ageSq')
+             mat2nii(map.stat{4}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_whiteInd')
+             mat2nii(map.stat{5}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_meduCnbGo1')
+             mat2nii(map.stat{6}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_mprageMassICV')
+             mat2nii(map.stat{7}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_averageRating')
+             mat2nii(map.stat{8}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorMood')
+             mat2nii(map.stat{9}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorPsych')
+             mat2nii(map.stat{10}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorExt')
+             mat2nii(map.stat{11}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorPhb')
+             mat2nii(map.stat{12}, '/cbica/home/kaczkura/t1Factors/images/dramms_ravens_template_2mm.nii.gz', 'stat_goassessItemBifactor4FactorOverallPsy')
+
+
+##############
+#### MISC ####
+##############
+
+A. To create plots of the cortical thickness data by age (to make sure data looks okay), use script, "CT_Figures.R"
+
+B. To make correlation tables for CT total and lobes vs correlated traits and bifactors, use script "CorrMatrix.R". 
+
+C. Merge the CT images into a 4d file for Tyler.
+   1. Use script, "GetCtPaths_2mm.sh" to get the bblids, scanids, and image paths for the 2mm CT images.
+   2. Use script, "MergeCTPaths.R" to merge these ct paths with the subject level data file.
+   3. Run the voxelwise gam wrapper to get the merged fourd file of images.
+   4. Use the script "NIFTI_to_Rdata.R" to:
+      a. Read the fourd images into R using antsR
+      b. Transform them to a matrix using timeseries2matrix
+      c. Save the ouput as an Rdata file
+
+D. Make a list of bblids who are 12 and up for Tyler to use to make STAI factor scores (script "GetStai_bblids.R").
+
+OTHER:
+lapply(dataGMDGm, mode)
+x<-lapply(Agr_GmWmModels_vol, summary)
+test<-lapply(Agr_GmWmModels_vol, lsmeans)
