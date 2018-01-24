@@ -1,0 +1,15 @@
+#Create lists of those missing a CT nii.gz file on chead.
+
+#!/bin/bash
+
+cat /data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1360_bblids_scanids.csv | while IFS="," read -r a b ;
+do
+
+if [ ! -f /data/joy/BBL/studies/pnc/n1601_dataFreeze2016/n1601_voxelwiseMaps/antsCt/${b}_CorticalThicknessNormalizedToTemplate2mm.nii.gz ]; then
+
+    echo $a,$b >> /data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/MissingCT.csv
+   
+fi
+
+done
+

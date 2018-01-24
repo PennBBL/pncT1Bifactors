@@ -1,0 +1,73 @@
+#Open qlogin session (3 cores and 50.5 and 50G of memory seem to be needed to get this script to run)
+qloginp3 -l h_vmem=50.5G,s_vmem=50.0G
+
+#MODEL: gam(volume~s(age) + sex + TBV + Mood + Psychosis + Externalizing + Phobias + OverallPsych) (N=1355 because 4 people were missing their _150.nii.gz ravens file on chead and monstrum)
+#Copy and paste the following to the command line:
+
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1355_JLF_subjData_Ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+mprage_antsCT_vol_TBV+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+pAdjustMethod="fdr"
+
+#MODEL: gam(volume~s(age) + sex + white + meduCnbGo1 + TBV + Mood + Psychosis + Externalizing + Phobias + OverallPsych) (N=1355 because 4 people were missing their _150.nii.gz ravens file on chead and monstrum)
+
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1355_JLF_subjData_Ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+white+meduCnbGo1+mprage_antsCT_vol_TBV+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+pAdjustMethod="fdr"
+
+##No TBV
+#MODEL: gam(volume~s(age) + sex + Mood + Psychosis + Externalizing + Phobias + OverallPsych) (N=1355 because 4 people were missing their _150.nii.gz ravens file on chead and monstrum)
+
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1355_JLF_subjData_Ravens.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder/results"
+namePaths="RavensPath"
+maskName="/data/joy/BBL/templates/pncRavensTemplate/dramms_ravens_template_mask_2mm.nii.gz"
+smooth=3.4
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+pAdjustMethod="fdr"
+
+
+##Merge CT images into 4d file for Tyler (make without smoothing initially and then see the results)
+#MODEL: doesn't matter, we're just running to get the fourd file of merged images. 
+subjDataName="/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1360_JLF_volCtGmd_subjData_CtPaths.rds"
+OutDirRoot="/data/joy/BBL/projects/pncT1AcrossDisorder/results"
+namePaths="ctPath"
+maskName="/data/joy/BBL/studies/pnc/n1601_dataFreeze2016/neuroimaging/t1struct/n1360_antsCt_mask.nii.gz"
+smooth=0
+inclusionName="ACROSS.INCLUDE"
+subjID="bblid"
+covsFormula="~s(age)+sex+goassessItemBifactor4FactorMood+goassessItemBifactor4FactorPsych+goassessItemBifactor4FactorExt+goassessItemBifactor4FactorPhb+goassessItemBifactor4FactorOverallPsy"
+logfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+errfile="/data/joy/BBL/projects/pncT1AcrossDisorder/results/logs"
+pAdjustMethod="fdr"
+
+
+#Call gam wrapper (use -d TRUE to skip merging the images into a fourd file if this has already been done before). 
+Rscript /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4 -d TRUE -a $pAdjustMethod
+
+#Call gam wrapper
+Rscript /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 1 -s 0 -a $pAdjustMethod
+Rscript /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 1 -s 3.4 -a $pAdjustMethod
+
+#Alternative to qlogin
+qsub -V -S /share/apps/R/R-3.1.1/bin/Rscript -cwd -o ${logfile} -e ${errfile} -binding linear:3 -pe unihost 3 -l h_vmem=50.5G,s_vmem=50.0G /data/joy/BBL/applications/groupAnalysis/gam_voxelwise.R -c $subjDataName -o $OutDirRoot -p $namePaths -m $maskName -i $inclusionName -u $subjID -f $covsFormula -n 3 -s 3.4
+

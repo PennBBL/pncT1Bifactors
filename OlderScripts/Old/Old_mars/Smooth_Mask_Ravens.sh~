@@ -1,0 +1,40 @@
+#Smooth and mask the Ravens data
+
+cat /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/bblids.csv | while IFS="," read -r a b c ;
+
+do
+
+path=`ls -d /data/joy/BBL/studies/pnc/processedData/structural/ravens/${a}/${c}x${b}/*_150_2mm.nii.gz`;
+
+mask=/data/joy/BBL/templates/pncRavensTemplate/mniGreyCombEons2mmEro.nii.gz
+
+outdir=/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/pncT1AcrossDisorderScripts/Testing
+
+pathName=$(echo $path|cut -d, -f1)
+
+fileName=$(basename $path | cut -d. -f1)
+
+echo $pathName                                                                                                                                                          
+echo ${fileName}                                                                                                                                                          
+fslmaths $pathName -s 0.85 -mas $mask $outdir/${fileName}_s2mm_masked.nii.gz
+
+done
+
+	
+	#append a random extension this
+#	filename=$(echo $i | cut -d. -f1)
+#	echo $filename
+#	fslmaths $i ${filename}_random
+#done
+
+#for i in $(cat $input_list); do
+
+#        echo "--- image path ---"
+#
+ #       imagePath=$(echo $i|cut -d, -f1)
+#	imageName=$(basename $i | cut -d. -f1)
+ #       echo  $imagePath, ${imageName}
+
+#	fslmaths $imagePath -s 0.85 -mas $mask $outdir/${imageName}_s2mm_masked.nii.gz
+#done
+

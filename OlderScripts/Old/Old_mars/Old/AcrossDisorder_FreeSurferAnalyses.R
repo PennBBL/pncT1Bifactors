@@ -1,0 +1,991 @@
+########################
+###LOAD DATA & SUBSET###
+########################
+
+#Load subject GO1 data release (n=1601), T1 QA dataset (n=1601), GMD/CT data (n=1570 because excludes those with missing MARS vol data), correlated traits data (n=9361; one subject missing corr traits data), and compartment volumes (cortical GM, subcortical GM, WM, cerebellum, brainstem) from the new ANTsCT pipeline (n=1601). 
+data.go1release <- read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1601_go1_datarel_020716.csv", header=TRUE, na.strings=".")
+data.qa <- read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/pnc1601_qaRatings_20160316.csv", header=TRUE, na.strings=".")
+data.GmdCT <- read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1601_GMD_CT_vals.csv", header=TRUE, na.strings=".")
+data.CorrTraits <- read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/Itemwise_Clinical_Corr-Traits_Factor_Scores.csv", header=TRUE, na.strings = ".")
+data.CompartVol <- read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/go1AntsCtVolumes.csv", header=TRUE, na.strings = ".")
+
+##Merge data using bblid
+#WARNING: Merging files with unequal cases will cause the non-matched bblids to be deleted (which is what we want in this case).
+data.merge <- merge(data.go1release, data.qa, by=c("bblid","scanid"))
+data.merge2 <- merge(data.merge, data.GmdCT, by=c("bblid","scanid"))
+data.merge3 <- merge(data.merge2, data.CorrTraits, by="bblid")
+data.merge4 <- merge(data.merge3, data.CompartVol, by=c("bblid","scanid"))
+
+#Put bblids in ascending order
+data.final <- data.merge4[order(data.merge4$bblid),]
+
+##Create an exclusion criteria variable
+#The three exclusion criteria are: healthExclude=1 (1=health problems); mprageSbiaExclude=1 (1=problems with their volume data); and averageRating=0 (0=bad QA).
+data.final$ACROSS.INCLUDE<-1
+data.final$ACROSS.INCLUDE[data.final$healthExclude==1]<-0
+data.final$ACROSS.INCLUDE[data.final$mprageSbiaExclude==1]<-0
+data.final$ACROSS.INCLUDE[data.final$averageRating==0]<-0
+
+##Exclude everyone that has one or more of these exclusion criteria
+data.final <- data.final[which(data.final$ACROSS.INCLUDE == 1), ]
+
+##After exclusion criteria, there are 1385 subjects
+subjData<-data.final
+
+
+############################
+#SEPARATE INTO GM, WM, CSF
+############################
+
+###VOLUME###
+
+#ALL ROIS
+dataMars<-subjData[,grep("mprage_mars_vol",names(subjData))]
+
+#GM-- these are the gray matter regions-- would only FDR across these 119 regions
+dataMarsGm<-dataMars[,-(unique(c( grep("WM",names(dataMars)), grep("Vent",names(dataMars)),grep("White",names(dataMars)), grep("corpus",names(dataMars)), grep("DC",names(dataMars)), 
+	grep("Brain_Stem",names(dataMars)), grep("CSF",names(dataMars)), grep("InC",names(dataMars)), grep("fornix",names(dataMars)), grep("ped",names(dataMars)) )))] 
+
+#WM-- these are the white matter regions: 17 regions
+dataMarsWm<-dataMars[,(unique(c( grep("WM",names(dataMars)),grep("fornix",names(dataMars)),grep("White_Matter",names(dataMars)), grep("corpus",names(dataMars)), grep("InC",names(dataMars)), 
+        grep("ped",names(dataMars)) )))]
+
+#CSF
+dataMarsCsf<-dataMars[,c(grep("CSF",names(dataMars)),grep("Vent",names(dataMars)))]
+dataMarsCsf<-dataMarsCsf[,-c(grep("DC",names(dataMarsCsf)))] #7
+
+#Get total volume per tissue class-- these define tissue class
+dataMarsGm<-data.matrix(dataMarsGm)
+subjData$Vol_gmTotal<-rowSums(dataMarsGm)
+dataMarsWm<-data.matrix(dataMarsWm)
+subjData$Vol_wmTotal<-rowSums(dataMarsWm)
+dataMarsCsf<-data.matrix(dataMarsCsf)
+subjData$Vol_csfTotal<-rowSums(dataMarsCsf)
+
+
+###CORTICAL THICKNESS###
+
+#ALL ROIS
+dataCT<-subjData[,grep("mprage_mars_ct",names(subjData))]
+
+#GM-- these are the gray matter regions-- would only FDR across these 119 regions
+dataCTGm<-dataCT[,-(unique(c( grep("WM",names(dataCT)), grep("Vent",names(dataCT)), grep("White",names(dataCT)), grep("corpus",names(dataCT)), grep("DC",names(dataCT)), 
+        grep("Brain_Stem",names(dataCT)), grep("CSF",names(dataCT)), grep("InC",names(dataCT)), grep("fornix",names(dataCT)), grep("ped",names(dataCT)), grep("Vessel",names(dataCT)) )))]
+
+#WM-- these are the white matter regions: 17 regions
+dataCTWm<-dataCT[,(unique(c( grep("WM",names(dataCT)),grep("fornix",names(dataCT)),grep("White_Matter",names(dataCT)), grep("corpus",names(dataCT)), grep("InC",names(dataCT)), 
+      grep("ped",names(dataCT)) )))]
+
+#CSF
+dataCTCsf<-dataCT[,c(grep("CSF",names(dataCT)),grep("Vent",names(dataCT)))]
+dataCTCsf<-dataCTCsf[,-c(grep("DC",names(dataCTCsf)))]
+
+#Get total volume per tissue class-- these define tissue class
+dataCTGm<-data.matrix(dataCTGm)
+subjData$CT_gmTotal<-rowSums(dataCTGm)
+dataCTWm<-data.matrix(dataCTWm)
+subjData$CT_wmTotal<-rowSums(dataCTWm)
+dataCTCsf<-data.matrix(dataCTCsf)
+subjData$CT_csfTotal<-rowSums(dataCTCsf)
+
+
+###GMD###
+
+#ALL ROIS
+dataGMD<-subjData[,grep("mprage_mars_gmd",names(subjData))]
+
+#GM-- these are the gray matter regions-- would only FDR across these 119 regions
+dataGMDGm<-dataGMD[,-(unique(c( grep("WM",names(dataGMD)), grep("Vent",names(dataGMD)),grep("White",names(dataGMD)), grep("corpus",names(dataGMD)), grep("DC",names(dataGMD)), 
+        grep("Brain_Stem",names(dataGMD)), grep("CSF",names(dataGMD)), grep("InC",names(dataGMD)), grep("fornix",names(dataGMD)), grep("ped",names(dataGMD)), grep("Vessel",names(dataGMD)) )))]
+
+#WM-- these are the white matter regions: 17 regions
+dataGMDWm<-dataGMD[,(unique(c( grep("WM",names(dataGMD)),grep("fornix",names(dataGMD)),grep("White_Matter",names(dataGMD)), grep("corpus",names(dataGMD)), grep("InC",names(dataGMD)), 
+       grep("ped",names(dataGMD)) )))]
+
+#CSF
+dataGMDCsf<-dataGMD[,c(grep("CSF",names(dataGMD)),grep("Vent",names(dataGMD)))]
+dataGMDCsf<-dataGMDCsf[,-c(grep("DC",names(dataGMDCsf)))] 
+
+#Get total volume per tissue class-- these define tissue class
+dataGMDGm<-data.matrix(dataGMDGm)
+subjData$GMD_gmTotal<-rowSums(dataGMDGm)
+dataGMDWm<-data.matrix(dataGMDWm)
+subjData$GMD_wmTotal<-rowSums(dataGMDWm)
+dataGMDCsf<-data.matrix(dataGMDCsf)
+subjData$GMD_csfTotal<-rowSums(dataGMDCsf)
+
+
+############################
+###SEPARATE GM INTO LOBES###
+############################
+
+###VOLUME###
+
+#cerebellum
+dataMarsCereb<-dataMars[,c(grep("CerExt",names(dataMars)),grep("CerVerLob",names(dataMars)))] #5 as per atlas
+
+#subcort
+dataMarsSubcort<-dataMars[,c(grep("Caudate",names(dataMars)),grep("Putamen",names(dataMars)),grep("Pallidum",names(dataMars)),grep("Accumbens",names(dataMars)),grep("Thal",names(dataMars)),
+        grep("BasForebr",names(dataMars)),grep("Hippo",names(dataMars)),grep("Amyg",names(dataMars)))] #16 regions
+
+#frontal
+dataMarsFrontal<-dataMars[,unique(c(grep("OrG",names(dataMars)),grep("ins",names(dataMars)),grep("FRP",names(dataMars)),grep("FG",names(dataMars)),grep("PrG",names(dataMars)),
+        grep("Gre",names(dataMars)),grep("MFC",names(dataMars)),grep("SCA",names(dataMars)),grep("SMC",names(dataMars)),grep("FRP",names(dataMars)),grep("CO",names(dataMars)),
+        grep("FO",names(dataMars)),grep("PO",names(dataMars)),grep("CgG",names(dataMars))))] #50 regions
+
+#occipital
+dataMarsOccipital<-dataMars[,unique(c(grep("OG",names(dataMars)),grep("OFuG",names(dataMars)),grep("OCP",names(dataMars)),grep("SOG",names(dataMars)),grep("Calc",names(dataMars)),
+        grep("Cun",names(dataMars)),grep("LiG",names(dataMars))))] #16 regions
+
+#parietal
+dataMarsParietal<-dataMars[,unique(c(grep("AnG",names(dataMars)),grep("PoG",names(dataMars)),grep("SMG",names(dataMars)),grep("SPL",names(dataMars)),grep("Pcu",names(dataMars))))] #12 regions
+
+#temporal
+dataMarsTemporal<-dataMars[,unique(c(grep("_FuG",names(dataMars)),grep("TG",names(dataMars)),grep("TMP",names(dataMars)),grep("PP",names(dataMars)),grep("PT",names(dataMars)),
+        grep("PHG",names(dataMars)),grep("Ent",names(dataMars))))] #20 regions
+
+#get total volume for GM lobes
+dataMarsCereb<-data.matrix(dataMarsCereb)
+subjData$Vol_gmCerebTotal<-rowSums(dataMarsCereb)
+dataMarsSubcort<-data.matrix(dataMarsSubcort)
+subjData$Vol_gmSubcortTotal<-rowSums(dataMarsSubcort)
+dataMarsFrontal<-data.matrix(dataMarsFrontal)
+subjData$Vol_gmFrontalTotal<-rowSums(dataMarsFrontal)
+dataMarsOccipital<-data.matrix(dataMarsOccipital)
+subjData$Vol_gmOccipitalTotal<-rowSums(dataMarsOccipital)
+dataMarsParietal<-data.matrix(dataMarsParietal)
+subjData$Vol_gmParietalTotal<-rowSums(dataMarsParietal)
+dataMarsTemporal<-data.matrix(dataMarsTemporal)
+subjData$Vol_gmTemporalTotal<-rowSums(dataMarsTemporal)
+
+
+
+###CORTICAL THICKNESS###
+
+#cerebellum
+dataCTCereb<-dataCT[,c(grep("CerExt",names(dataCT)),grep("CerVerLob",names(dataCT)))] #5 as per atlas
+
+#subcort
+dataCTSubcort<-dataCT[,c(grep("Caudate",names(dataCT)),grep("Putamen",names(dataCT)),grep("Pallidum",names(dataCT)),grep("Accumbens",names(dataCT)),grep("Thal",names(dataCT)),
+        grep("BasForebr",names(dataCT)),grep("Hippo",names(dataCT)),grep("Amyg",names(dataCT)))] #16 regions
+
+#frontal
+dataCTFrontal<-dataCT[,unique(c(grep("OrG",names(dataCT)),grep("ins",names(dataCT)),grep("FRP",names(dataCT)),grep("FG",names(dataCT)),grep("PrG",names(dataCT)),grep("Gre",names(dataCT)),
+        grep("MFC",names(dataCT)),grep("SCA",names(dataCT)),grep("SMC",names(dataCT)),grep("FRP",names(dataCT)),grep("CO",names(dataCT)),grep("FO",names(dataCT)),grep("PO",names(dataCT)),
+        grep("CgG",names(dataCT))))] #50 regions
+
+#occipital
+dataCTOccipital<-dataCT[,unique(c(grep("OG",names(dataCT)),grep("OFuG",names(dataCT)),grep("OCP",names(dataCT)),grep("SOG",names(dataCT)),grep("Calc",names(dataCT)),grep("Cun",names(dataCT)),
+        grep("LiG",names(dataCT))))] #16 regions
+
+#parietal
+dataCTParietal<-dataCT[,unique(c(grep("AnG",names(dataCT)),grep("PoG",names(dataCT)),grep("SMG",names(dataCT)),grep("SPL",names(dataCT)),grep("Pcu",names(dataCT))))] #12 regions
+
+#temporal
+dataCTTemporal<-dataCT[,unique(c(grep("_FuG",names(dataCT)),grep("TG",names(dataCT)),grep("TMP",names(dataCT)),grep("PP",names(dataCT)),grep("PT",names(dataCT)),grep("PHG",names(dataCT)),
+        grep("Ent",names(dataCT))))] #20 regions
+
+#get total volume for GM subdivisions
+dataCTCereb<-data.matrix(dataCTCereb)
+subjData$CT_gmCerebTotal<-rowSums(dataCTCereb)
+dataCTSubcort<-data.matrix(dataCTSubcort)
+subjData$CT_gmSubcortTotal<-rowSums(dataCTSubcort)
+dataCTFrontal<-data.matrix(dataCTFrontal)
+subjData$CT_gmFrontalTotal<-rowSums(dataCTFrontal)
+dataCTOccipital<-data.matrix(dataCTOccipital)
+subjData$CT_gmOccipitalTotal<-rowSums(dataCTOccipital)
+dataCTParietal<-data.matrix(dataCTParietal)
+subjData$CT_gmParietalTotal<-rowSums(dataCTParietal)
+dataCTTemporal<-data.matrix(dataCTTemporal)
+subjData$CT_gmTemporalTotal<-rowSums(dataCTTemporal)
+
+
+
+###GMD###
+
+#cerebellum
+dataGMDCereb<-dataGMD[,c(grep("CerExt",names(dataGMD)),grep("CerVerLob",names(dataGMD)))] #5 as per atlas
+
+#subcort
+dataGMDSubcort<-dataGMD[,c(grep("Caudate",names(dataGMD)),grep("Putamen",names(dataGMD)),grep("Pallidum",names(dataGMD)),grep("Accumbens",names(dataGMD)),grep("Thal",names(dataGMD)),
+	grep("BasForebr",names(dataGMD)),grep("Hippo",names(dataGMD)),grep("Amyg",names(dataGMD)))] #16 regions
+
+#frontal
+dataGMDFrontal<-dataGMD[,unique(c(grep("OrG",names(dataGMD)),grep("ins",names(dataGMD)),grep("FRP",names(dataGMD)),grep("FG",names(dataGMD)),grep("PrG",names(dataGMD)),grep("Gre",names(dataGMD)),
+        grep("MFC",names(dataGMD)),grep("SCA",names(dataGMD)),grep("SMC",names(dataGMD)),grep("FRP",names(dataGMD)),grep("CO",names(dataGMD)),grep("FO",names(dataGMD)),grep("PO",names(dataGMD)),
+        grep("CgG",names(dataGMD))))] #50 regions
+
+#occipital
+dataGMDOccipital<-dataGMD[,unique(c(grep("OG",names(dataGMD)),grep("OFuG",names(dataGMD)),grep("OCP",names(dataGMD)),grep("SOG",names(dataGMD)),grep("Calc",names(dataGMD)),
+        grep("Cun",names(dataGMD)),grep("LiG",names(dataGMD))))] #16 regions
+
+#parietal
+dataGMDParietal<-dataGMD[,unique(c(grep("AnG",names(dataGMD)),grep("PoG",names(dataGMD)),grep("SMG",names(dataGMD)),grep("SPL",names(dataGMD)),grep("Pcu",names(dataGMD))))] #12 regions
+
+#temporal
+dataGMDTemporal<-dataGMD[,unique(c(grep("_FuG",names(dataGMD)),grep("TG",names(dataGMD)),grep("TMP",names(dataGMD)),grep("PP",names(dataGMD)),grep("PT",names(dataGMD)),grep("PHG",names(dataGMD)),
+        grep("Ent",names(dataGMD))))] #20 regions
+
+#get total volume for GM subdivisions
+dataGMDCereb<-data.matrix(dataGMDCereb)
+subjData$GMD_gmCerebTotal<-rowSums(dataGMDCereb)
+dataGMDSubcort<-data.matrix(dataGMDSubcort)
+subjData$GMD_gmSubcortTotal<-rowSums(dataGMDSubcort)
+dataGMDFrontal<-data.matrix(dataGMDFrontal)
+subjData$GMD_gmFrontalTotal<-rowSums(dataGMDFrontal)
+dataGMDOccipital<-data.matrix(dataGMDOccipital)
+subjData$GMD_gmOccipitalTotal<-rowSums(dataGMDOccipital)
+dataGMDParietal<-data.matrix(dataGMDParietal)
+subjData$GMD_gmParietalTotal<-rowSums(dataGMDParietal)
+dataGMDTemporal<-data.matrix(dataGMDTemporal)
+subjData$GMD_gmTemporalTotal<-rowSums(dataGMDTemporal)
+
+
+
+#########################
+###TRANSFORM VARIABLES###
+#########################
+
+#Transform the age variable from months to years
+subjData$age<-(subjData$ageAtGo1Scan)/12
+
+#sex (needs to be an ordered variable when using spline interactions)
+subjData$sex[which(subjData$sex==1)]<-"male"
+subjData$sex[which(subjData$sex==2)]<-"female"
+subjData$sex<-as.ordered(as.factor(subjData$sex))
+
+#race (make white vs non-white)
+subjData$White<-NA
+subjData$White[which(subjData$race==1)]<-"Caucasian"
+subjData$White[which(subjData$race!=1)]<-"notCaucasian"
+subjData$White<-as.ordered(as.factor(subjData$White))
+
+
+###############
+###SAVE DATA###
+###############
+
+saveRDS(subjData,"/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_MARS_datarel_020716.rds")
+
+
+
+#######################################
+###LOAD LIBRARY AND CREATE VAR LISTS###
+#######################################
+
+##Load library for nonlinear analyses
+library(mgcv)
+
+##Create lists of variables names of interest: grouped by 1) white matter, gray matter, csf, 2) lobes, or 3) ROIs
+
+CVol_List <- names(subjData)[2648:2653]
+
+Vol_GmWmList <- names(subjData)[2656:2658]
+Vol_LobeList <- names(subjData)[2665:2670]
+Vol_ROIList <- colnames(dataMarsGm)
+
+CT_GmWmList <- names(subjData)[2659:2661]
+CT_LobeList <- names(subjData)[2671:2676]
+CT_ROIList <- colnames(dataCTGm)
+
+GMD_GmWmList <- names(subjData)[2662:2664]
+GMD_LobeList <- names(subjData)[2677:2682]
+GMD_ROIList <- colnames(dataGMDGm)
+
+
+
+#####################
+###VOLUME ANALYSES###
+#####################
+#Structural data: volumetric data from MARS: i.e., mprage_mars_vol_*
+#Covariate: must include ICV as covariate in all volumetric analyses (mprageMassICV); Also include the QA rating score (averageRating) as a covariate.
+#Additional covariates to include: s(age), sex, White, maternal education (meduCnbGo1); same as in Satterthwaite 2016 JAMA psychosis structural paper.
+
+
+####PSYCHOPATHOLOGY BIFACTORS####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModels_vol <- lapply(Vol_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(GmWmModels_vol, summary)
+
+#Create a vector p-values
+GmWmMood_vol<-sapply(GmWmModels_vol, function(v) summary(v)$p.table[7,4])
+GmWmPsych_vol<-sapply(GmWmModels_vol, function(v) summary(v)$p.table[8,4])
+GmWmExt_vol<-sapply(GmWmModels_vol, function(v) summary(v)$p.table[9,4])
+GmWmPhb_vol<-sapply(GmWmModels_vol, function(v) summary(v)$p.table[10,4])
+GmWmOverallPsy_vol<-sapply(GmWmModels_vol, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+GmWmMood_vol_fdr<-p.adjust(GmWmMood_vol,method="fdr")
+GmWmPsych_vol_fdr<-p.adjust(GmWmPsych_vol,method="fdr")
+GmWmExt_vol_fdr<-p.adjust(GmWmExt_vol,method="fdr")
+GmWmPhb_vol_fdr<-p.adjust(GmWmPhb_vol,method="fdr")
+GmWmOverallPsy_vol_fdr<-p.adjust(GmWmOverallPsy_vol,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModels_vol <- lapply(Vol_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(LobeModels_vol, summary)
+
+#Create a vector p-values
+LobeMood_vol<-sapply(LobeModels_vol, function(v) summary(v)$p.table[7,4])
+LobePsych_vol<-sapply(LobeModels_vol, function(v) summary(v)$p.table[8,4])
+LobeExt_vol<-sapply(LobeModels_vol, function(v) summary(v)$p.table[9,4])
+LobePhb_vol<-sapply(LobeModels_vol, function(v) summary(v)$p.table[10,4])
+LobeOverallPsy_vol<-sapply(LobeModels_vol, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+LobeMood_vol_fdr<-p.adjust(LobeMood_vol,method="fdr")
+LobePsych_vol_fdr<-p.adjust(LobePsych_vol,method="fdr")
+LobeExt_vol_fdr<-p.adjust(LobeExt_vol,method="fdr")
+LobePhb_vol_fdr<-p.adjust(LobePhb_vol,method="fdr")
+LobeOverallPsy_vol_fdr<-p.adjust(LobeOverallPsy_vol,method="fdr")
+
+
+###ROIs###
+#GAM model
+ROIModels_vol <- lapply(Vol_ROIList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(ROIModels_vol, summary)
+
+#Create a vector p-values
+ROIMood_vol<-sapply(ROIModels_vol, function(v) summary(v)$p.table[7,4])
+ROIPsych_vol<-sapply(ROIModels_vol, function(v) summary(v)$p.table[8,4])
+ROIExt_vol<-sapply(ROIModels_vol, function(v) summary(v)$p.table[9,4])
+ROIPhb_vol<-sapply(ROIModels_vol, function(v) summary(v)$p.table[10,4])
+ROIOverallPsy_vol<-sapply(ROIModels_vol, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values 
+ROIMood_vol_fdr<-p.adjust(ROIMood_vol,method="fdr")
+ROIPsych_vol_fdr<-p.adjust(ROIPsych_vol,method="fdr")
+ROIExt_vol_fdr<-p.adjust(ROIExt_vol,method="fdr")
+ROIPhb_vol_fdr<-p.adjust(ROIPhb_vol,method="fdr")
+ROIOverallPsy_vol_fdr<-p.adjust(ROIOverallPsy_vol,method="fdr")
+
+
+
+
+####CORRELATED TRAITS- NOT AGE REGRESSED####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModelsMood_vol <- lapply(Vol_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsPsych_vol <- lapply(Vol_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsExt_vol <- lapply(Vol_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsFear_vol <- lapply(Vol_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(GmWmModelsMood_vol, summary)
+lapply(GmWmModelsPsych_vol, summary)
+lapply(GmWmModelsExt_vol, summary)
+lapply(GmWmModelsFear_vol, summary)
+
+#Create a vector p-values
+GmWmCMood_vol<-sapply(GmWmModelsMood_vol, function(v) summary(v)$p.table[7,4])
+GmWmCPsych_vol<-sapply(GmWmModelsPsych_vol, function(v) summary(v)$p.table[7,4])
+GmWmCExt_vol<-sapply(GmWmModelsExt_vol, function(v) summary(v)$p.table[7,4])
+GmWmCFear_vol<-sapply(GmWmModelsFear_vol, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+GmWmCMood_vol_fdr<-p.adjust(GmWmCMood_vol,method="fdr")
+GmWmCPsych_vol_fdr<-p.adjust(GmWmCPsych_vol,method="fdr")
+GmWmCExt_vol_fdr<-p.adjust(GmWmCExt_vol,method="fdr")
+GmWmCFear_vol_fdr<-p.adjust(GmWmCFear_vol,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModelsMood_vol <- lapply(Vol_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsPsych_vol <- lapply(Vol_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsExt_vol <- lapply(Vol_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsFear_vol <- lapply(Vol_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(LobeModelsMood_vol, summary)
+lapply(LobeModelsPsych_vol, summary)
+lapply(LobeModelsExt_vol, summary)
+lapply(LobeModelsFear_vol, summary)
+
+#Create a vector p-values
+LobeCMood_vol<-sapply(LobeModelsMood_vol, function(v) summary(v)$p.table[7,4])
+LobeCPsych_vol<-sapply(LobeModelsPsych_vol, function(v) summary(v)$p.table[7,4])
+LobeCExt_vol<-sapply(LobeModelsExt_vol, function(v) summary(v)$p.table[7,4])
+LobeCFear_vol<-sapply(LobeModelsFear_vol, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+LobeCMood_vol_fdr<-p.adjust(LobeCMood_vol,method="fdr")
+LobeCPsych_vol_fdr<-p.adjust(LobeCPsych_vol,method="fdr")
+LobeCExt_vol_fdr<-p.adjust(LobeCExt_vol,method="fdr")
+LobeCFear_vol_fdr<-p.adjust(LobeCFear_vol,method="fdr")
+
+
+###ROIs###
+#GAM model
+ROIModelsMood_vol <- lapply(Vol_ROIList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+ROIModelsPsych_vol <- lapply(Vol_ROIList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+ROIModelsExt_vol <- lapply(Vol_ROIList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+ROIModelsFear_vol <- lapply(Vol_ROIList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(ROIModelsMood_vol, summary)
+lapply(ROIModelsPsych_vol, summary)
+lapply(ROIModelsExt_vol, summary)
+lapply(ROIModelsFear_vol, summary)
+
+#Create a vector p-values
+ROICMood_vol<-sapply(ROIModelsMood_vol, function(v) summary(v)$p.table[7,4])
+ROICPsych_vol<-sapply(ROIModelsPsych_vol, function(v) summary(v)$p.table[7,4])
+ROICExt_vol<-sapply(ROIModelsExt_vol, function(v) summary(v)$p.table[7,4])
+ROICFear_vol<-sapply(ROIModelsFear_vol, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+ROICMood_vol_fdr<-p.adjust(ROICMood_vol,method="fdr")
+ROICPsych_vol_fdr<-p.adjust(ROICPsych_vol,method="fdr")
+ROICExt_vol_fdr<-p.adjust(ROICExt_vol,method="fdr")
+ROICFear_vol_fdr<-p.adjust(ROICFear_vol,method="fdr")
+
+
+
+
+###################################
+### COMPARTMENT VOLUME ANALYSES ###
+###################################
+#Structural data: compartment volumes (cortical GM, subcortical GM, WM, cerebellum, brainstem) from the new ANTsCT pipeline.
+#Note that "oneLobe", "twoLobe," etc. corresponds to the segmentation classes of this image type: /data/joy/BBL/studies/pnc/processedData/structural/antsCorticalThickness/100031/20100918x3818/BrainSegmentation.nii.gz
+#Covariate: must include "tbv" instead of ICV as covariate in analyses; Also include the QA rating score (averageRating) as a covariate.
+#Additional covariates to include: s(age), sex, White, maternal education (meduCnbGo1); same as in Satterthwaite 2016 JAMA psychosis structural paper.
+
+
+####PSYCHOPATHOLOGY BIFACTORS####
+
+#GAM model
+CVolModels <- lapply(CVol_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + tbv + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CVolModels, summary)
+
+#Create a vector p-values
+Mood_cvol<-sapply(CVolModels, function(v) summary(v)$p.table[7,4])
+Psych_cvol<-sapply(CVolModels, function(v) summary(v)$p.table[8,4])
+Ext_cvol<-sapply(CVolModels, function(v) summary(v)$p.table[9,4])
+Phb_cvol<-sapply(CVolModels, function(v) summary(v)$p.table[10,4])
+OverallPsy_cvol<-sapply(CVolModels, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+Mood_cvol_fdr<-p.adjust(Mood_cvol,method="fdr")
+Psych_cvol_fdr<-p.adjust(Psych_cvol,method="fdr")
+Ext_cvol_fdr<-p.adjust(Ext_cvol,method="fdr")
+Phb_cvol_fdr<-p.adjust(Phb_cvol,method="fdr")
+OverallPsy_cvol_fdr<-p.adjust(OverallPsy_cvol,method="fdr")
+
+
+####CORRELATED TRAITS- NOT AGE REGRESSED####
+
+#GAM model
+CVolModelsMood <- lapply(CVol_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + tbv + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+CVolModelsPsych <- lapply(CVol_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + tbv + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+CVolModelsExt <- lapply(CVol_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + tbv + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+CVolModelsFear <- lapply(CVol_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + tbv + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CVolModelsMood, summary)
+lapply(CVolModelsPsych, summary)
+lapply(CVolModelsExt, summary)
+lapply(CVolModelsFear, summary)
+
+#Create a vector p-values
+CorrTraitMood_cvol<-sapply(CVolModelsMood, function(v) summary(v)$p.table[7,4])
+CorrTraitPsych_cvol<-sapply(CVolModelsPsych, function(v) summary(v)$p.table[7,4])
+CorrTraitExt_cvol<-sapply(CVolModelsExt, function(v) summary(v)$p.table[7,4])
+CorrTraitFear_cvol<-sapply(CVolModelsFear, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CorrTraitMood_cvol_fdr<-p.adjust(CorrTraitMood_cvol,method="fdr")
+CorrTraitPsych_cvol_fdr<-p.adjust(CorrTraitPsych_cvol,method="fdr")
+CorrTraitExt_cvol_fdr<-p.adjust(CorrTraitExt_cvol,method="fdr")
+CorrTraitFear_cvol_fdr<-p.adjust(CorrTraitFear_cvol,method="fdr")
+
+
+
+#################################
+###CORTICAL THICKNESS ANALYSES###
+#################################
+#Cortical thickness data from MARS: i.e., mprage_mars_ct_*
+#Covariate: must include ICV as covariate in all volumetric analyses (mprageMassICV); Also include the QA rating score (averageRating) as a covariate.
+#Additional covariates to include: s(age), sex, White, maternal education (meduCnbGo1); same as in Satterthwaite 2016 JAMA psychosis structural paper.
+
+
+####PSYCHOPATHOLOGY BIFACTORS####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModels_ct <- lapply(CT_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(GmWmModels_ct, summary)
+
+#Create a vector p-values
+GmWmMood_ct<-sapply(GmWmModels_ct, function(v) summary(v)$p.table[7,4])
+GmWmPsych_ct<-sapply(GmWmModels_ct, function(v) summary(v)$p.table[8,4])
+GmWmExt_ct<-sapply(GmWmModels_ct, function(v) summary(v)$p.table[9,4])
+GmWmPhb_ct<-sapply(GmWmModels_ct, function(v) summary(v)$p.table[10,4])
+GmWmOverallPsy_ct<-sapply(GmWmModels_ct, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+GmWmMood_ct_fdr<-p.adjust(GmWmMood_ct,method="fdr")
+GmWmPsych_ct_fdr<-p.adjust(GmWmPsych_ct,method="fdr")
+GmWmExt_ct_fdr<-p.adjust(GmWmExt_ct,method="fdr")
+GmWmPhb_ct_fdr<-p.adjust(GmWmPhb_ct,method="fdr")
+GmWmOverallPsy_ct_fdr<-p.adjust(GmWmOverallPsy_ct,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModels_ct <- lapply(CT_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(LobeModels_ct, summary)
+
+#Create a vector p-values
+LobeMood_ct<-sapply(LobeModels_ct, function(v) summary(v)$p.table[7,4])
+LobePsych_ct<-sapply(LobeModels_ct, function(v) summary(v)$p.table[8,4])
+LobeExt_ct<-sapply(LobeModels_ct, function(v) summary(v)$p.table[9,4])
+LobePhb_ct<-sapply(LobeModels_ct, function(v) summary(v)$p.table[10,4])
+LobeOverallPsy_ct<-sapply(LobeModels_ct, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+LobeMood_ct_fdr<-p.adjust(LobeMood_ct,method="fdr")
+LobePsych_ct_fdr<-p.adjust(LobePsych_ct,method="fdr")
+LobeExt_ct_fdr<-p.adjust(LobeExt_ct,method="fdr")
+LobePhb_ct_fdr<-p.adjust(LobePhb_ct,method="fdr")
+LobeOverallPsy_ct_fdr<-p.adjust(LobeOverallPsy_ct,method="fdr")
+
+
+###ROIs###
+#GAM model
+#Error in gam.fit(G, family = G$family, control = control, gamma = gamma,:iterative weights or data non-finite in gam.fit - regularization may help. See ?gam.control.
+
+#ROIModels_ct <- lapply(CT_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+#        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+#})
+
+#Look at the model summaries
+#lapply(ROIModels_ct, summary)
+
+#Create a vector p-values
+#ROIMood_ct<-sapply(ROIModels_ct, function(v) summary(v)$p.table[7,4])
+#ROIPsych_ct<-sapply(ROIModels_ct, function(v) summary(v)$p.table[8,4])
+#ROIExt_ct<-sapply(ROIModels_ct, function(v) summary(v)$p.table[9,4])
+#ROIPhb_ct<-sapply(ROIModels_ct, function(v) summary(v)$p.table[10,4])
+#ROIOverallPsy_ct<-sapply(ROIModels_ct, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values 
+#ROIMood_ct_fdr<-p.adjust(ROIMood_ct,method="fdr")
+#ROIPsych_ct_fdr<-p.adjust(ROIPsych_ct,method="fdr")
+#ROIExt_ct_fdr<-p.adjust(ROIExt_ct,method="fdr")
+#ROIPhb_ct_fdr<-p.adjust(ROIPhb_ct,method="fdr")
+#ROIOverallPsy_ct_fdr<-p.adjust(ROIOverallPsy_ct,method="fdr")
+
+
+
+
+####CORRELATED TRAITS- NOT AGE REGRESSED####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModelsMood_ct <- lapply(CT_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsPsych_ct <- lapply(CT_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsExt_ct <- lapply(CT_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsFear_ct <- lapply(CT_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(GmWmModelsMood_ct, summary)
+lapply(GmWmModelsPsych_ct, summary)
+lapply(GmWmModelsExt_ct, summary)
+lapply(GmWmModelsFear_ct, summary)
+
+#Create a vector p-values
+GmWmCMood_ct<-sapply(GmWmModelsMood_ct, function(v) summary(v)$p.table[7,4])
+GmWmCPsych_ct<-sapply(GmWmModelsPsych_ct, function(v) summary(v)$p.table[7,4])
+GmWmCExt_ct<-sapply(GmWmModelsExt_ct, function(v) summary(v)$p.table[7,4])
+GmWmCFear_ct<-sapply(GmWmModelsFear_ct, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+GmWmCMood_ct_fdr<-p.adjust(GmWmCMood_ct,method="fdr")
+GmWmCPsych_ct_fdr<-p.adjust(GmWmCPsych_ct,method="fdr")
+GmWmCExt_ct_fdr<-p.adjust(GmWmCExt_ct,method="fdr")
+GmWmCFear_ct_fdr<-p.adjust(GmWmCFear_ct,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModelsMood_ct <- lapply(CT_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsPsych_ct <- lapply(CT_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsExt_ct <- lapply(CT_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsFear_ct <- lapply(CT_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(LobeModelsMood_ct, summary)
+lapply(LobeModelsPsych_ct, summary)
+lapply(LobeModelsExt_ct, summary)
+lapply(LobeModelsFear_ct, summary)
+
+#Create a vector p-values
+LobeCMood_ct<-sapply(LobeModelsMood_ct, function(v) summary(v)$p.table[7,4])
+LobeCPsych_ct<-sapply(LobeModelsPsych_ct, function(v) summary(v)$p.table[7,4])
+LobeCExt_ct<-sapply(LobeModelsExt_ct, function(v) summary(v)$p.table[7,4])
+LobeCFear_ct<-sapply(LobeModelsFear_ct, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+LobeCMood_ct_fdr<-p.adjust(LobeCMood_ct,method="fdr")
+LobeCPsych_ct_fdr<-p.adjust(LobeCPsych_ct,method="fdr")
+LobeCExt_ct_fdr<-p.adjust(LobeCExt_ct,method="fdr")
+LobeCFear_ct_fdr<-p.adjust(LobeCFear_ct,method="fdr")
+
+
+###ROIs###
+#GAM model
+#Error in gam.fit(G, family = G$family, control = control, gamma = gamma,:iterative weights or data non-finite in gam.fit - regularization may help. See ?gam.control.
+
+#ROIModelsMood_ct <- lapply(CT_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsPsych_ct <- lapply(CT_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsExt_ct <- lapply(CT_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsFear_ct <- lapply(CT_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+#})
+
+
+#Look at the model summaries
+#lapply(ROIModelsMood_ct, summary)
+#lapply(ROIModelsPsych_ct, summary)
+#lapply(ROIModelsExt_ct, summary)
+#lapply(ROIModelsFear_ct, summary)
+
+#Create a vector p-values
+#ROICMood_ct<-sapply(ROIModelsMood_ct, function(v) summary(v)$p.table[7,4])
+#ROICPsych_ct<-sapply(ROIModelsPsych_ct, function(v) summary(v)$p.table[7,4])
+#ROICExt_ct<-sapply(ROIModelsExt_ct, function(v) summary(v)$p.table[7,4])
+#ROICFear_ct<-sapply(ROIModelsFear_ct, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+#ROICMood_ct_fdr<-p.adjust(ROICMood_ct,method="fdr")
+#ROICPsych_ct_fdr<-p.adjust(ROICPsych_ct,method="fdr")
+#ROICExt_ct_fdr<-p.adjust(ROICExt_ct,method="fdr")
+#ROICFear_ct_fdr<-p.adjust(ROICFear_ct,method="fdr")
+
+
+
+
+
+##################
+###GMD ANALYSES###
+##################
+#Structural data: GMD data from MARS: i.e., mprage_mars_gmd_*
+#Covariate: must include ICV as covariate in all volumetric analyses (mprageMassICV); Also include the QA rating score (averageRating) as a covariate.
+#Additional covariates to include: s(age), sex, White, maternal education (meduCnbGo1); same as in Satterthwaite 2016 JAMA psychosis structural paper.
+
+
+####PSYCHOPATHOLOGY BIFACTORS####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModels_gmd <- lapply(GMD_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(GmWmModels_gmd, summary)
+
+#Create a vector p-values
+GmWmMood_gmd<-sapply(GmWmModels_gmd, function(v) summary(v)$p.table[7,4])
+GmWmPsych_gmd<-sapply(GmWmModels_gmd, function(v) summary(v)$p.table[8,4])
+GmWmExt_gmd<-sapply(GmWmModels_gmd, function(v) summary(v)$p.table[9,4])
+GmWmPhb_gmd<-sapply(GmWmModels_gmd, function(v) summary(v)$p.table[10,4])
+GmWmOverallPsy_gmd<-sapply(GmWmModels_gmd, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+GmWmMood_gmd_fdr<-p.adjust(GmWmMood_gmd,method="fdr")
+GmWmPsych_gmd_fdr<-p.adjust(GmWmPsych_gmd,method="fdr")
+GmWmExt_gmd_fdr<-p.adjust(GmWmExt_gmd,method="fdr")
+GmWmPhb_gmd_fdr<-p.adjust(GmWmPhb_gmd,method="fdr")
+GmWmOverallPsy_gmd_fdr<-p.adjust(GmWmOverallPsy_gmd,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModels_gmd <- lapply(GMD_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(LobeModels_gmd, summary)
+
+#Create a vector p-values
+LobeMood_gmd<-sapply(LobeModels_gmd, function(v) summary(v)$p.table[7,4])
+LobePsych_gmd<-sapply(LobeModels_gmd, function(v) summary(v)$p.table[8,4])
+LobeExt_gmd<-sapply(LobeModels_gmd, function(v) summary(v)$p.table[9,4])
+LobePhb_gmd<-sapply(LobeModels_gmd, function(v) summary(v)$p.table[10,4])
+LobeOverallPsy_gmd<-sapply(LobeModels_gmd, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values
+LobeMood_gmd_fdr<-p.adjust(LobeMood_gmd,method="fdr")
+LobePsych_gmd_fdr<-p.adjust(LobePsych_gmd,method="fdr")
+LobeExt_gmd_fdr<-p.adjust(LobeExt_gmd,method="fdr")
+LobePhb_gmd_fdr<-p.adjust(LobePhb_gmd,method="fdr")
+LobeOverallPsy_gmd_fdr<-p.adjust(LobeOverallPsy_gmd,method="fdr")
+
+
+###ROIs###
+#GAM model
+#Error in gam.fit(G, family = G$family, control = control, gamma = gamma,:iterative weights or data non-finite in gam.fit - regularization may help. See ?gam.control.
+
+#ROIModels_gmd <- lapply(GMD_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+#        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+#})
+
+#Look at the model summaries
+#lapply(ROIModels_gmd, summary)
+
+#Create a vector p-values
+#ROIMood_gmd<-sapply(ROIModels_gmd, function(v) summary(v)$p.table[7,4])
+#ROIPsych_gmd<-sapply(ROIModels_gmd, function(v) summary(v)$p.table[8,4])
+#ROIExt_gmd<-sapply(ROIModels_gmd, function(v) summary(v)$p.table[9,4])
+#ROIPhb_gmd<-sapply(ROIModels_gmd, function(v) summary(v)$p.table[10,4])
+#ROIOverallPsy_gmd<-sapply(ROIModels_gmd, function(v) summary(v)$p.table[11,4])
+
+#FDR correct p-values 
+#ROIMood_gmd_fdr<-p.adjust(ROIMood_gmd,method="fdr")
+#ROIPsych_gmd_fdr<-p.adjust(ROIPsych_gmd,method="fdr")
+#ROIExt_gmd_fdr<-p.adjust(ROIExt_gmd,method="fdr")
+#ROIPhb_gmd_fdr<-p.adjust(ROIPhb_gmd,method="fdr")
+#ROIOverallPsy_gmd_fdr<-p.adjust(ROIOverallPsy_gmd,method="fdr")
+
+
+
+
+####CORRELATED TRAITS- NOT AGE REGRESSED####
+
+###GM, WM, CSF###
+#GAM model
+GmWmModelsMood_gmd <- lapply(GMD_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsPsych_gmd <- lapply(GMD_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsExt_gmd <- lapply(GMD_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+GmWmModelsFear_gmd <- lapply(GMD_GmWmList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(GmWmModelsMood_gmd, summary)
+lapply(GmWmModelsPsych_gmd, summary)
+lapply(GmWmModelsExt_gmd, summary)
+lapply(GmWmModelsFear_gmd, summary)
+
+#Create a vector p-values
+GmWmCMood_gmd<-sapply(GmWmModelsMood_gmd, function(v) summary(v)$p.table[7,4])
+GmWmCPsych_gmd<-sapply(GmWmModelsPsych_gmd, function(v) summary(v)$p.table[7,4])
+GmWmCExt_gmd<-sapply(GmWmModelsExt_gmd, function(v) summary(v)$p.table[7,4])
+GmWmCFear_gmd<-sapply(GmWmModelsFear_gmd, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+GmWmCMood_gmd_fdr<-p.adjust(GmWmCMood_gmd,method="fdr")
+GmWmCPsych_gmd_fdr<-p.adjust(GmWmCPsych_gmd,method="fdr")
+GmWmCExt_gmd_fdr<-p.adjust(GmWmCExt_gmd,method="fdr")
+GmWmCFear_gmd_fdr<-p.adjust(GmWmCFear_gmd,method="fdr")
+
+
+###LOBES###
+#GAM model
+LobeModelsMood_gmd <- lapply(GMD_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsPsych_gmd <- lapply(GMD_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsExt_gmd <- lapply(GMD_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+LobeModelsFear_gmd <- lapply(GMD_LobeList, function(x) {
+    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(LobeModelsMood_gmd, summary)
+lapply(LobeModelsPsych_gmd, summary)
+lapply(LobeModelsExt_gmd, summary)
+lapply(LobeModelsFear_gmd, summary)
+
+#Create a vector p-values
+LobeCMood_gmd<-sapply(LobeModelsMood_gmd, function(v) summary(v)$p.table[7,4])
+LobeCPsych_gmd<-sapply(LobeModelsPsych_gmd, function(v) summary(v)$p.table[7,4])
+LobeCExt_gmd<-sapply(LobeModelsExt_gmd, function(v) summary(v)$p.table[7,4])
+LobeCFear_gmd<-sapply(LobeModelsFear_gmd, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+LobeCMood_gmd_fdr<-p.adjust(LobeCMood_gmd,method="fdr")
+LobeCPsych_gmd_fdr<-p.adjust(LobeCPsych_gmd,method="fdr")
+LobeCExt_gmd_fdr<-p.adjust(LobeCExt_gmd,method="fdr")
+LobeCFear_gmd_fdr<-p.adjust(LobeCFear_gmd,method="fdr")
+
+
+###ROIs###
+#GAM model
+#Error in gam.fit(G, family = G$family, control = control, gamma = gamma,:iterative weights or data non-finite in gam.fit - regularization may help. See ?gam.control.
+
+#ROIModelsMood_gmd <- lapply(GMD_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Mood, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsPsych_gmd <- lapply(GMD_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Psychosis, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsExt_gmd <- lapply(GMD_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Externalizing, list(i = as.name(x))), data = subjData)
+#})
+
+#ROIModelsFear_gmd <- lapply(GMD_ROIList, function(x) {
+#    gam(substitute(i ~ s(age) + sex + White + meduCnbGo1 + mprageMassICV + averageRating + Fear, list(i = as.name(x))), data = subjData)
+#})
+
+
+#Look at the model summaries
+#lapply(ROIModelsMood_gmd, summary)
+#lapply(ROIModelsPsych_gmd, summary)
+#lapply(ROIModelsExt_gmd, summary)
+#lapply(ROIModelsFear_gmd, summary)
+
+#Create a vector p-values
+#ROICMood_gmd<-sapply(ROIModelsMood_gmd, function(v) summary(v)$p.table[7,4])
+#ROICPsych_gmd<-sapply(ROIModelsPsych_gmd, function(v) summary(v)$p.table[7,4])
+#ROICExt_gmd<-sapply(ROIModelsExt_gmd, function(v) summary(v)$p.table[7,4])
+#ROICFear_gmd<-sapply(ROIModelsFear_gmd, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+#ROICMood_gmd_fdr<-p.adjust(ROICMood_gmd,method="fdr")
+#ROICPsych_gmd_fdr<-p.adjust(ROICPsych_gmd,method="fdr")
+#ROICExt_gmd_fdr<-p.adjust(ROICExt_gmd,method="fdr")
+#ROICFear_gmd_fdr<-p.adjust(ROICFear_gmd,method="fdr")
+

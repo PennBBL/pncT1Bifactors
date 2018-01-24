@@ -1,0 +1,45 @@
+MIDAS analyses
+    a. MIDAS detects multivariate neuroimaging patterns related to a continuous subject-level variable.
+    b. Get access to cbica (ask	Ted)
+    c. Next, we need to mask the images individually before transferring them to cbica because the MIDAS script does not have a masking option.
+       1. To mask the ASL images by the asl mask (which is already masked by gray matter prior), use the script "MaskAslDataForMIDAS.sh".
+       2. This only masks the data that passed the pcaslVoxelwiseExclude, t1Exclude, and healthExclude criteria.
+    d. Next, need to copy ASL images to CBICA.
+       1. Get the list of the ASL masked file names using the script "GetAslFileNamesForMIDAS.sh".
+          a. We only want the filenames, not the paths, in this case.
+       2. Zip the files
+              cd /data/joy/BBL/projects/pncAslAcrossDisorder/images/maskedAslForMIDAS
+              tar -cvf /data/joy/BBL/projects/pncAslAcrossDisorder/images/n1029_aslVox11andUp_masked.tar.gz -T /data/joy/BBL/projects/pncAslAcrossDisorder/subjectData/n1259_aslFileNames.csv
+       3. Then copy them to CBICA
+              ssh kaczkura@cbica-cluster.uphs.upenn.edu
+              mkdir /cbica/home/sattertt/n1259_pnc_asl/pncAsl_masked
+              scp akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncAslAcrossDisorder/images/n1259pncAsl.tar.gz /cbica/home/sattertt/n1259_pnc_asl/pncAsl_masked
+       4. Extract the files on cbica (can also delete the tar file)
+              tar -xvf n1259pncAsl.tar.gz
+              rm n1259pncAsl.tar.gz
+       5. Permissions
+          a. Change the permissions of all files in the images directory to be very liberal.
+              chmod 777 pncAsl_masked
+    e. Prepare data for MIDAS
+       1. Copy the n1259 scanid list to cbica
+               scp akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncAslAcrossDisorder/subjectData/n1259_aslVox_scanids.csv /cbica/home/kaczkura/pncAslAcrossDisorder/subjectData
+       2. Copy the n1259 subject level data to cbica
+               scp akaczkurkin@chead.uphs.upenn.edu:/data/joy/BBL/projects/pncAslAcrossDisorder/subjectData/n1259_JLF_aslVox_subjData_aslPaths.rds /cbica/home/kaczkura/pncAslAcrossDisorder/subjectData
+       3. On cbica, use the script "GetAslPathsCbica.sh" to get a the cbica ASL paths.
+       4. Use the script, "prepareAslDataForMidas.R" on cbica to set up the subject data file for MIDAS.
+              a. This script will:
+                 1. Load the subject-level data and cbica asl path file.
+                 2. Make sex = 0 or 1.
+                 3. Create the ageBySex and ageSqBySex interaction variables for the model.
+                 4. Merge the subject data with the cbica asl paths.
+                 5. Subset the data to only the variables used in MIDAS (NOTE: cbicaAslPath should be the first variable in the .csv file).
+                 6. Save the file on cbica.
+    f. Copy the ASL template from chead to cbica (for use by mat2nii later):
+            scp "/data/joy/BBL/studies/pnc/template/pnc_template_brain_2mm.nii.gz" kaczkura@cbica-cluster.uphs.upenn.edu:/cbica/home/kaczkura/pncAslAcrossDisorder/images
+    g. Run MIDAS with the following command (takes about an hour to an hour and half to run; you can request up to 150G per qsub):
+       a. NOTE: Erdem said that MIDAS cannot handle covariates that depend on one another (like age and ageSq or interactions); also, he suggests having only having one psych variable (like OverallPsy) in the model at a time.
+qsub-run --sge '-l h_vmem=50G' ./midas_script.sh -d /cbica/home/kaczkura/pncAslAcrossDisorder/MIDAS/subjectData/n1259_JLF_aslVox_subjData_MIDAS.csv -o /cbica/home/kaczkura/pncAslAcrossDisorder/MIDAS/MIDAS_results/n1259_JLF_aslVox_MI\
+DAS -g cbicaAslPath, age, sexInd, pcaslRelMeanRMSMotion, goassessItemBifactor4FactorMood, goassessItemBifactor4FactorPsych, goassessItemBifactor4FactorExt, goassessItemBifactor4FactorPhb, goassessItemBifactor4FactorOverallPsy
+
+qsub-run --sge '-l h_vmem=50G' ./midas_script.sh -d /cbica/home/kaczkura/pncAslAcrossDisorder/MIDAS/subjectData/n1259_JLF_aslVox_subjData_MIDAS.csv -o /cbica/home/kaczkura/pncAslAcrossDisorder/MIDAS/MIDAS_results/n1259_JLF_aslVox_MI\
+DAS -g cbicaAslPath, age, sexInd, pcaslRelMeanRMSMotion, goassessItemBifactor4FactorOverallPsy

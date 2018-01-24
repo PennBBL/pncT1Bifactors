@@ -1,0 +1,15 @@
+Ravens sample path:
+/data/joy/BBL/studies/pnc/processedData/structural/ravens/115665/20110326x4734
+
+
+Generate paths script:
+/data/joy/BBL/studies/exampleData/groupAnalysis/testScript/n404_gettingPaths.sh
+
+
+Generate RDS File:
+/data/joy/BBL/studies/exampleData/groupAnalysis/testScript/n404_get_bblids.R
+
+
+GAM Voxelwise Wikipedia:
+https://github.com/PennBBL/groupAnalysis/wiki/Gam_Voxelwise
+
