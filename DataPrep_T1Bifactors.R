@@ -24,6 +24,9 @@ data.bifactors <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/
 #Correlated traits (n=1601)
 data.corrTraits <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_corrtraits_scores_20161219.csv", header=TRUE, na.strings="")
 
+#Correlated traits self regressed (n=1601)
+data.corrTraits_sr <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_fscores_self_regressed_20170131.csv", header=TRUE, na.strings="")
+
 #State trait anxiety data (n=1391)
 data.stai <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_stai_pre_post_itemwise_smry_factors_20170131.csv", header=TRUE, na.strings="")
 
@@ -79,6 +82,11 @@ data.aslLobes <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimagi
 data.rest.alff <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfALFFValues_20170714.csv", header=TRUE, na.strings="NA")
 data.rest.reho <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfReHoValues_20170714.csv", header=TRUE, na.strings="NA")
 
+#Freesurfer SurfaceArea 
+data.fs.sa <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1601_freesurferSurfaceArea_20180213.csv", header=TRUE)
+
+#Freesurfer CorticalThickness
+data.fs.ct <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1601_freesurferCt_20180213.csv", header=TRUE)
 
 #################
 ### DATA PREP ###
@@ -97,7 +105,7 @@ data.demo$sex[which(data.demo$sex==2)] <- 1
 #Make sex a factor
 data.demo$sex <- as.factor(data.demo$sex)
 
-#Define white vs nonwhite
+#Define white vs nonwhite (white=1, non-white=0)
 data.demo$white <- 0
 data.demo$white[which(data.demo$race==1)] <- 1
 
@@ -122,28 +130,31 @@ dataMerge3 <-merge(dataMerge2,data.suicide, by=c("bblid","scanid"), all=TRUE)
 dataMerge4 <-merge(dataMerge3,data.goItems, by=c("bblid","scanid"), all=TRUE)
 dataMerge5 <-merge(dataMerge4,data.bifactors, by=c("bblid","scanid"), all=TRUE)
 dataMerge6 <-merge(dataMerge5,data.corrTraits, by=c("bblid","scanid"), all=TRUE)
-dataMerge7 <-merge(dataMerge6,data.stai, by=c("bblid","scanid"), all=TRUE) 
-dataMerge8 <-merge(dataMerge7,data.cogFactors, by=c("bblid","scanid"), all=TRUE)
-dataMerge9 <-merge(dataMerge8,data.cogZscores, by=c("bblid","scanid"), all=TRUE)
-dataMerge10 <-merge(dataMerge9,data.wrat, by=c("bblid","scanid"), all=TRUE)
-dataMerge11 <-merge(dataMerge10,data.envir, by=c("bblid","scanid"), all=TRUE)
-dataMerge12 <-merge(dataMerge11,data.healthExclude, by=c("bblid","scanid"), all=TRUE)
-dataMerge13 <-merge(dataMerge12,data.t1QA, by=c("bblid","scanid"), all=TRUE)
-dataMerge14 <-merge(dataMerge13,data.aslQA, by=c("bblid","scanid"), all=TRUE)
-dataMerge15 <-merge(dataMerge14,data.restQA, by=c("bblid","scanid"), all=TRUE)
-dataMerge16 <- merge(dataMerge15,data.CtNMF, by=c("bblid","scanid"), all=TRUE)
-dataMerge17 <- merge(dataMerge16,data.RavensNMF, by=c("bblid","scanid"), all=TRUE)
-dataMerge18 <- merge(dataMerge17,data.ct, by=c("bblid","scanid"), all=TRUE)
-dataMerge19 <- merge(dataMerge18,data.vol, by=c("bblid","scanid"), all=TRUE)
-dataMerge20 <- merge(dataMerge19,data.volLobes, by=c("bblid","scanid"), all=TRUE)
-dataMerge21 <- merge(dataMerge20,data.tbv, by=c("bblid","scanid"), all=TRUE)
-dataMerge22 <- merge(dataMerge21,data.asl, by=c("bblid","scanid"), all=TRUE)
-dataMerge23 <- merge(dataMerge22,data.aslLobes, by=c("bblid","scanid"), all=TRUE)
-dataMerge24 <- merge(dataMerge23,data.rest.alff, by=c("bblid","scanid"), all=TRUE)
-dataMerge25 <- merge(dataMerge24,data.rest.reho, by=c("bblid","scanid"), all=TRUE)
+dataMerge7 <-merge(dataMerge6,data.corrTraits_sr, by=c("bblid","scanid") ,all=TRUE)
+dataMerge8 <-merge(dataMerge7,data.stai, by=c("bblid","scanid"), all=TRUE) 
+dataMerge9 <-merge(dataMerge8,data.cogFactors, by=c("bblid","scanid"), all=TRUE)
+dataMerge10 <-merge(dataMerge9,data.cogZscores, by=c("bblid","scanid"), all=TRUE)
+dataMerge11 <-merge(dataMerge10,data.wrat, by=c("bblid","scanid"), all=TRUE)
+dataMerge12 <-merge(dataMerge11,data.envir, by=c("bblid","scanid"), all=TRUE)
+dataMerge13 <-merge(dataMerge12,data.healthExclude, by=c("bblid","scanid"), all=TRUE)
+dataMerge14 <-merge(dataMerge13,data.t1QA, by=c("bblid","scanid"), all=TRUE)
+dataMerge15 <-merge(dataMerge14,data.aslQA, by=c("bblid","scanid"), all=TRUE)
+dataMerge16 <-merge(dataMerge15,data.restQA, by=c("bblid","scanid"), all=TRUE)
+dataMerge17 <- merge(dataMerge16,data.CtNMF, by=c("bblid","scanid"), all=TRUE)
+dataMerge18 <- merge(dataMerge17,data.RavensNMF, by=c("bblid","scanid"), all=TRUE)
+dataMerge19 <- merge(dataMerge18,data.ct, by=c("bblid","scanid"), all=TRUE)
+dataMerge20 <- merge(dataMerge19,data.vol, by=c("bblid","scanid"), all=TRUE)
+dataMerge21 <- merge(dataMerge20,data.volLobes, by=c("bblid","scanid"), all=TRUE)
+dataMerge22 <- merge(dataMerge21,data.tbv, by=c("bblid","scanid"), all=TRUE)
+dataMerge23 <- merge(dataMerge22,data.asl, by=c("bblid","scanid"), all=TRUE)
+dataMerge24 <- merge(dataMerge23,data.aslLobes, by=c("bblid","scanid"), all=TRUE)
+dataMerge25 <- merge(dataMerge24,data.rest.alff, by=c("bblid","scanid"), all=TRUE)
+dataMerge26 <- merge(dataMerge25,data.rest.reho, by=c("bblid","scanid"), all=TRUE)
+dataMerge27 <- merge(dataMerge26,data.fs.sa, by=c("bblid","scanid"), all=TRUE)
+dataMerge28 <- merge(dataMerge27,data.fs.ct, by=c("bblid","scanid"), all=TRUE)
 
 #Retain only the 1601 bblids (demographics has 1629)
-data.n1601 <- dataMerge25[match(data.t1QA$bblid, dataMerge25$bblid, nomatch=0),] 
+data.n1601 <- dataMerge28[match(data.t1QA$bblid, dataMerge28$bblid, nomatch=0),] 
 
 #Put bblids in ascending order
 data.ordered <- data.n1601[order(data.n1601$bblid),]

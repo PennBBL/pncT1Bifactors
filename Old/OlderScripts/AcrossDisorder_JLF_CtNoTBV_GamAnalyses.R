@@ -1,0 +1,1220 @@
+#################
+### LOAD DATA ###
+#################
+#All n=1601 subjects (minus the exclusion criteria).
+subjData <- readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1360_JLF_volCtGmd_subjData.rds")
+
+#Data that has been subset to include those with anxiety disorders (Agr, Gad, Ocd, Pan, Ptd, Sep, Soc, Sph) and Typically Developing, minus exclusion criteria.
+AllAnxTdSubjData <- readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1094_JLF_volCtGmd_AllAnxTdSubjData.rds")
+
+#Data that has been subset to only include those with anxiety disorders (Agr, Gad, Ocd, Pan, Ptd, Sep, Soc, Sph) (No TD), minus exclusion criteria.
+AllAnxSubjData <- readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n680_JLF_volCtGmd_AllAnxSubjData.rds")
+
+#Data that has been subset to only include those age 12	and up (for STAI analyses)
+staiSubjData <- readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1019_JLF_stai_subjData.rds")
+
+#Data that has been subset to only include those age 11 and up (for proband analyses)
+probandSubjData <- readRDS("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1103_JLF_11andUp_subjData.rds")
+
+
+#######################################
+###LOAD LIBRARY AND CREATE VAR LISTS###
+#######################################
+
+##Load library for nonlinear analyses
+library(mgcv)
+
+##Create lists of variables names of interest: 1) gray matter (don't include white matter or csf for ct data), 2) lobes (don't include cerebellum or subcortical for ct data), or 3) ROIs.
+
+CT_Gm_List <- names(subjData)[2848]
+CT_Lobe_List <- names(subjData)[2856:2859]
+dataCTGm <- subjData[,grep("mprage_jlf_ct",names(subjData))]
+CT_ROI_List <- colnames(dataCTGm)
+
+
+#################################################
+#################################################
+###### CORTICAL THICKNESS ANALYSES (NO TBV) #####
+######## All Anx subjects only (no TD) ##########
+#################################################
+#################################################
+#CT data: cortical thickness data from JLF: i.e., mprage_jlf_ct_*
+
+#############################
+#### STATE TRAIT ANXIETY ####
+#############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnx_Stai_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Stai_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnx_Gm_State <- sapply(CT_NoTBV_AllAnx_Stai_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Gm_Trait <- sapply(CT_NoTBV_AllAnx_Stai_Gm, function(v) summary(v)$p.table[4,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnx_Stai_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Stai_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_Lobes_State <- sapply(CT_NoTBV_AllAnx_Stai_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Lobes_Trait <- sapply(CT_NoTBV_AllAnx_Stai_Lobes, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_Lobes_State_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_State,method="fdr")
+CT_NoTBV_AllAnx_Lobes_Trait_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_Trait,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnx_Stai_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Stai_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_ROIs_State <- sapply(CT_NoTBV_AllAnx_Stai_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_ROIs_Trait <- sapply(CT_NoTBV_AllAnx_Stai_ROIs, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_ROIs_State_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_State,method="fdr")
+CT_NoTBV_AllAnx_ROIs_Trait_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_Trait,method="fdr")
+
+
+
+############################
+#### TRAIT ANXIETY ONLY ####
+############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnx_Trait_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Trait_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnx_Gm_TraitOnly <- sapply(CT_NoTBV_AllAnx_Trait_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnx_Trait_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Trait_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_Lobes_TraitOnly <- sapply(CT_NoTBV_AllAnx_Trait_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_Lobes_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_TraitOnly,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnx_Trait_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Trait_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_ROIs_TraitOnly <- sapply(CT_NoTBV_AllAnx_Trait_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_ROIs_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_TraitOnly,method="fdr")
+
+
+
+##############################################
+#### CORRELATED TRAITS- NOT AGE REGRESSED ####
+##############################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnx_CorrTrMood_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrPsych_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrExt_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrFear_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_CorrTrMood_Gm, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrPsych_Gm, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrExt_Gm, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrFear_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnx_Gm_CorrTrMood <- sapply(CT_NoTBV_AllAnx_CorrTrMood_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Gm_CorrTrPsych <- sapply(CT_NoTBV_AllAnx_CorrTrPsych_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Gm_CorrTrExt <- sapply(CT_NoTBV_AllAnx_CorrTrExt_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Gm_CorrTrFear <- sapply(CT_NoTBV_AllAnx_CorrTrFear_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnx_CorrTrMood_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrPsych_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrExt_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrFear_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_CorrTrMood_Lobes, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrPsych_Lobes, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrExt_Lobes, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrFear_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_Lobes_CorrTrMood <- sapply(CT_NoTBV_AllAnx_CorrTrMood_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Lobes_CorrTrPsych <- sapply(CT_NoTBV_AllAnx_CorrTrPsych_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Lobes_CorrTrExt <- sapply(CT_NoTBV_AllAnx_CorrTrExt_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Lobes_CorrTrFear <- sapply(CT_NoTBV_AllAnx_CorrTrFear_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_Lobes_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_CorrTrMood,method="fdr")
+CT_NoTBV_AllAnx_Lobes_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_CorrTrPsych,method="fdr")
+CT_NoTBV_AllAnx_Lobes_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_CorrTrExt,method="fdr")
+CT_NoTBV_AllAnx_Lobes_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_CorrTrFear,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnx_CorrTrMood_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrPsych_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrExt_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+CT_NoTBV_AllAnx_CorrTrFear_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_CorrTrMood_ROIs, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrPsych_ROIs, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrExt_ROIs, summary)
+lapply(CT_NoTBV_AllAnx_CorrTrFear_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_ROIs_CorrTrMood <- sapply(CT_NoTBV_AllAnx_CorrTrMood_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_ROIs_CorrTrPsych <- sapply(CT_NoTBV_AllAnx_CorrTrPsych_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_ROIs_CorrTrExt <- sapply(CT_NoTBV_AllAnx_CorrTrExt_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_ROIs_CorrTrFear <- sapply(CT_NoTBV_AllAnx_CorrTrFear_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_ROIs_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_CorrTrMood,method="fdr")
+CT_NoTBV_AllAnx_ROIs_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_CorrTrPsych,method="fdr")
+CT_NoTBV_AllAnx_ROIs_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_CorrTrExt,method="fdr")
+CT_NoTBV_AllAnx_ROIs_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_CorrTrFear,method="fdr")
+
+
+
+###################################
+#### PSYCHOPATHOLOGY BIFACTORS ####
+###################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnx_Bifactors_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Bifactors_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnx_Gm_Mood <- sapply(CT_NoTBV_AllAnx_Bifactors_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Gm_Psych <- sapply(CT_NoTBV_AllAnx_Bifactors_Gm, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnx_Gm_Ext <- sapply(CT_NoTBV_AllAnx_Bifactors_Gm, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnx_Gm_Phb <- sapply(CT_NoTBV_AllAnx_Bifactors_Gm, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnx_Gm_OverallPsy <- sapply(CT_NoTBV_AllAnx_Bifactors_Gm, function(v) summary(v)$p.table[7,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnx_Bifactors_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Bifactors_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_Lobes_Mood <- sapply(CT_NoTBV_AllAnx_Bifactors_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_Lobes_Psych <- sapply(CT_NoTBV_AllAnx_Bifactors_Lobes, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnx_Lobes_Ext <- sapply(CT_NoTBV_AllAnx_Bifactors_Lobes, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnx_Lobes_Phb <- sapply(CT_NoTBV_AllAnx_Bifactors_Lobes, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnx_Lobes_OverallPsy <- sapply(CT_NoTBV_AllAnx_Bifactors_Lobes, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnx_Lobes_Mood_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_Mood,method="fdr")
+CT_NoTBV_AllAnx_Lobes_Psych_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_Psych,method="fdr")
+CT_NoTBV_AllAnx_Lobes_Ext_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_Ext,method="fdr")
+CT_NoTBV_AllAnx_Lobes_Phb_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_Phb,method="fdr")
+CT_NoTBV_AllAnx_Lobes_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllAnx_Lobes_OverallPsy,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnx_Bifactors_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnx_Bifactors_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnx_ROIs_Mood <- sapply(CT_NoTBV_AllAnx_Bifactors_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnx_ROIs_Psych <- sapply(CT_NoTBV_AllAnx_Bifactors_ROIs, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnx_ROIs_Ext <- sapply(CT_NoTBV_AllAnx_Bifactors_ROIs, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnx_ROIs_Phb <- sapply(CT_NoTBV_AllAnx_Bifactors_ROIs, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnx_ROIs_OverallPsy <- sapply(CT_NoTBV_AllAnx_Bifactors_ROIs, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values 
+CT_NoTBV_AllAnx_ROIs_Mood_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_Mood,method="fdr")
+CT_NoTBV_AllAnx_ROIs_Psych_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_Psych,method="fdr")
+CT_NoTBV_AllAnx_ROIs_Ext_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_Ext,method="fdr")
+CT_NoTBV_AllAnx_ROIs_Phb_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_Phb,method="fdr")
+CT_NoTBV_AllAnx_ROIs_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllAnx_ROIs_OverallPsy,method="fdr")
+
+
+
+############################################
+############################################
+### CORTICAL THICKNESS ANALYSES (NO TBV) ###
+######## All Anx subjects and TD ###########
+############################################
+############################################
+#CT data: cortical thickness data from JLF: i.e., mprage_jlf_ct_*
+
+###########################
+#### ALL ANXIETY VS TD ####
+###########################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnxVsTd_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + AllAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxVsTd_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_Gm_AllAnxTd <- sapply(CT_NoTBV_AllAnxVsTd_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnxVsTd_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + AllAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxVsTd_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_Lobes_AllAnxTd <- sapply(CT_NoTBV_AllAnxVsTd_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_Lobes_AllAnxTd_fdr <- p.adjust(CT_NoTBV_Lobes_AllAnxTd,method="fdr")
+
+
+##ROIs###
+#GAM model
+CT_NoTBV_AllAnxVsTd_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + AllAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxVsTd_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_ROIs_AllAnxTd <- sapply(CT_NoTBV_AllAnxVsTd_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_ROIs_AllAnxTd_fdr <- p.adjust(CT_NoTBV_ROIs_AllAnxTd,method="fdr")
+
+
+
+##############################
+#### COARSE ANXIETY VS TD ####
+##############################
+
+###GM###
+#GAM model
+CT_NoTBV_CoarseAnxVsTd_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + CoarseAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_CoarseAnxVsTd_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_Gm_CoarseAnxTd <- sapply(CT_NoTBV_CoarseAnxVsTd_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_CoarseAnxVsTd_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + CoarseAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_CoarseAnxVsTd_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_Lobes_CoarseAnxTd <- sapply(CT_NoTBV_CoarseAnxVsTd_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_Lobes_CoarseAnxTd_fdr <- p.adjust(CT_NoTBV_Lobes_CoarseAnxTd,method="fdr")
+
+
+##ROIs###
+#GAM model
+CT_NoTBV_CoarseAnxVsTd_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + CoarseAnxTd, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_CoarseAnxVsTd_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_ROIs_CoarseAnxTd <- sapply(CT_NoTBV_CoarseAnxVsTd_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_ROIs_CoarseAnxTd_fdr <- p.adjust(CT_NoTBV_ROIs_CoarseAnxTd,method="fdr")
+
+
+
+#############################
+#### STATE TRAIT ANXIETY ####
+#############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnxTd_Stai_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Stai_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnxTd_Gm_State <- sapply(CT_NoTBV_AllAnxTd_Stai_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Gm_Trait <- sapply(CT_NoTBV_AllAnxTd_Stai_Gm, function(v) summary(v)$p.table[4,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnxTd_Stai_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Stai_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_Lobes_State <- sapply(CT_NoTBV_AllAnxTd_Stai_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Lobes_Trait <- sapply(CT_NoTBV_AllAnxTd_Stai_Lobes, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_Lobes_State_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_State,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_Trait_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_Trait,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnxTd_Stai_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Stai_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_ROIs_State <- sapply(CT_NoTBV_AllAnxTd_Stai_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_ROIs_Trait <- sapply(CT_NoTBV_AllAnxTd_Stai_ROIs, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_ROIs_State_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_State,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_Trait_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_Trait,method="fdr")
+
+
+
+############################
+#### TRAIT ANXIETY ONLY ####
+############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnxTd_Trait_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Trait_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnxTd_Gm_TraitOnly <- sapply(CT_NoTBV_AllAnxTd_Trait_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnxTd_Trait_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Trait_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_Lobes_TraitOnly <- sapply(CT_NoTBV_AllAnxTd_Trait_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_Lobes_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_TraitOnly,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnxTd_Trait_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Trait_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_ROIs_TraitOnly <- sapply(CT_NoTBV_AllAnxTd_Trait_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_ROIs_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_TraitOnly,method="fdr")
+
+
+
+##############################################
+#### CORRELATED TRAITS- NOT AGE REGRESSED ####
+##############################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnxTd_CorrTrMood_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrPsych_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrExt_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrFear_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_CorrTrMood_Gm, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrPsych_Gm, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrExt_Gm, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrFear_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnxTd_Gm_CorrTrMood <- sapply(CT_NoTBV_AllAnxTd_CorrTrMood_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Gm_CorrTrPsych <- sapply(CT_NoTBV_AllAnxTd_CorrTrPsych_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Gm_CorrTrExt <- sapply(CT_NoTBV_AllAnxTd_CorrTrExt_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Gm_CorrTrFear <- sapply(CT_NoTBV_AllAnxTd_CorrTrFear_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnxTd_CorrTrMood_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrPsych_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrExt_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrFear_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_CorrTrMood_Lobes, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrPsych_Lobes, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrExt_Lobes, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrFear_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_Lobes_CorrTrMood <- sapply(CT_NoTBV_AllAnxTd_CorrTrMood_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Lobes_CorrTrPsych <- sapply(CT_NoTBV_AllAnxTd_CorrTrPsych_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Lobes_CorrTrExt <- sapply(CT_NoTBV_AllAnxTd_CorrTrExt_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Lobes_CorrTrFear <- sapply(CT_NoTBV_AllAnxTd_CorrTrFear_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_Lobes_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_CorrTrMood,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_CorrTrPsych,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_CorrTrExt,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_CorrTrFear,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllAnxTd_CorrTrMood_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrPsych_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrExt_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+CT_NoTBV_AllAnxTd_CorrTrFear_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_CorrTrMood_ROIs, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrPsych_ROIs, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrExt_ROIs, summary)
+lapply(CT_NoTBV_AllAnxTd_CorrTrFear_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_ROIs_CorrTrMood <- sapply(CT_NoTBV_AllAnxTd_CorrTrMood_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_ROIs_CorrTrPsych <- sapply(CT_NoTBV_AllAnxTd_CorrTrPsych_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_ROIs_CorrTrExt <- sapply(CT_NoTBV_AllAnxTd_CorrTrExt_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_ROIs_CorrTrFear <- sapply(CT_NoTBV_AllAnxTd_CorrTrFear_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_ROIs_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_CorrTrMood,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_CorrTrPsych,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_CorrTrExt,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_CorrTrFear,method="fdr")
+
+
+
+###################################
+#### PSYCHOPATHOLOGY BIFACTORS ####
+###################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllAnxTd_Bifactors_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+    +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllAnxTd_Gm_Mood <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Gm_Psych <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnxTd_Gm_Ext <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnxTd_Gm_Phb <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnxTd_Gm_OverallPsy <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Gm, function(v) summary(v)$p.table[7,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllAnxTd_Bifactors_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_Lobes_Mood <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_Lobes_Psych <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnxTd_Lobes_Ext <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnxTd_Lobes_Phb <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnxTd_Lobes_OverallPsy <- sapply(CT_NoTBV_AllAnxTd_Bifactors_Lobes, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_Lobes_Mood_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_Mood,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_Psych_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_Psych,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_Ext_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_Ext,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_Phb_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_Phb,method="fdr")
+CT_NoTBV_AllAnxTd_Lobes_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllAnxTd_Lobes_OverallPsy,method="fdr")
+
+
+##ROIs###
+#GAM model
+CT_NoTBV_AllAnxTd_Bifactors_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = AllAnxTdSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllAnxTd_ROIs_Mood <- sapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllAnxTd_ROIs_Psych <- sapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllAnxTd_ROIs_Ext <- sapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllAnxTd_ROIs_Phb <- sapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllAnxTd_ROIs_OverallPsy <- sapply(CT_NoTBV_AllAnxTd_Bifactors_ROIs, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_AllAnxTd_ROIs_Mood_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_Mood,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_Psych_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_Psych,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_Ext_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_Ext,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_Phb_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_Phb,method="fdr")
+CT_NoTBV_AllAnxTd_ROIs_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllAnxTd_ROIs_OverallPsy,method="fdr")
+
+
+
+############################################
+############################################
+### CORTICAL THICKNESS ANALYSES (NO TBV) ###
+####### Proband sample (n=1103) ############
+############################################
+############################################
+#CT data: cortical thickness data from JLF: i.e., mprage_jlf_ct_*
+
+
+##############################################
+#### CORRELATED TRAITS- NOT AGE REGRESSED ####
+##############################################
+
+###GM###
+#GAM model
+CT_NoTBV_ProbandSubj_CorrTrMood_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrPsych_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrExt_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrFear_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = probandSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_CorrTrMood_Gm, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrPsych_Gm, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrExt_Gm, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrFear_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_ProbandSubj_Gm_CorrTrMood <- sapply(CT_NoTBV_ProbandSubj_CorrTrMood_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Gm_CorrTrPsych <- sapply(CT_NoTBV_ProbandSubj_CorrTrPsych_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Gm_CorrTrExt <- sapply(CT_NoTBV_ProbandSubj_CorrTrExt_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Gm_CorrTrFear <- sapply(CT_NoTBV_ProbandSubj_CorrTrFear_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_ProbandSubj_CorrTrMood_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrPsych_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrExt_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrFear_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = probandSubjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_CorrTrMood_Lobes, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrPsych_Lobes, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrExt_Lobes, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrFear_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_ProbandSubj_Lobes_CorrTrMood <- sapply(CT_NoTBV_ProbandSubj_CorrTrMood_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Lobes_CorrTrPsych <- sapply(CT_NoTBV_ProbandSubj_CorrTrPsych_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Lobes_CorrTrExt <- sapply(CT_NoTBV_ProbandSubj_CorrTrExt_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Lobes_CorrTrFear <- sapply(CT_NoTBV_ProbandSubj_CorrTrFear_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_ProbandSubj_Lobes_CorrTrMood_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_CorrTrMood,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_CorrTrPsych,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_CorrTrExt_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_CorrTrExt,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_CorrTrFear_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_CorrTrFear,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_ProbandSubj_CorrTrMood_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrPsych_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrExt_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = probandSubjData)
+})
+
+CT_NoTBV_ProbandSubj_CorrTrFear_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = probandSubjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_CorrTrMood_ROIs, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrPsych_ROIs, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrExt_ROIs, summary)
+lapply(CT_NoTBV_ProbandSubj_CorrTrFear_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_ProbandSubj_ROIs_CorrTrMood <- sapply(CT_NoTBV_ProbandSubj_CorrTrMood_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_ROIs_CorrTrPsych <- sapply(CT_NoTBV_ProbandSubj_CorrTrPsych_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_ROIs_CorrTrExt <- sapply(CT_NoTBV_ProbandSubj_CorrTrExt_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_ROIs_CorrTrFear <- sapply(CT_NoTBV_ProbandSubj_CorrTrFear_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_ProbandSubj_ROIs_CorrTrMood_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_CorrTrMood,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_CorrTrPsych,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_CorrTrExt_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_CorrTrExt,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_CorrTrFear_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_CorrTrFear,method="fdr")
+
+
+
+###################################
+#### PSYCHOPATHOLOGY BIFACTORS ####
+###################################
+
+###GM###
+#GAM model
+CT_NoTBV_ProbandSubj_Bifactors_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = probandSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_ProbandSubj_Gm_Mood <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Gm_Psych <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_ProbandSubj_Gm_Ext <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_ProbandSubj_Gm_Phb <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_ProbandSubj_Gm_OverallPsy <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Gm, function(v) summary(v)$p.table[7,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_ProbandSubj_Bifactors_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = probandSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_ProbandSubj_Lobes_Mood <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_Lobes_Psych <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_ProbandSubj_Lobes_Ext <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_ProbandSubj_Lobes_Phb <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_ProbandSubj_Lobes_OverallPsy <- sapply(CT_NoTBV_ProbandSubj_Bifactors_Lobes, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_ProbandSubj_Lobes_Mood_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_Mood,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_Psych_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_Psych,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_Ext_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_Ext,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_Phb_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_Phb,method="fdr")
+CT_NoTBV_ProbandSubj_Lobes_OverallPsy_fdr <- p.adjust(CT_NoTBV_ProbandSubj_Lobes_OverallPsy,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_ProbandSubj_Bifactors_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = probandSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_ProbandSubj_ROIs_Mood <- sapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_ProbandSubj_ROIs_Psych <- sapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_ProbandSubj_ROIs_Ext <- sapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_ProbandSubj_ROIs_Phb <- sapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_ProbandSubj_ROIs_OverallPsy <- sapply(CT_NoTBV_ProbandSubj_Bifactors_ROIs, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_ProbandSubj_ROIs_Mood_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_Mood,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_Psych_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_Psych,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_Ext_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_Ext,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_Phb_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_Phb,method="fdr")
+CT_NoTBV_ProbandSubj_ROIs_OverallPsy_fdr <- p.adjust(CT_NoTBV_ProbandSubj_ROIs_OverallPsy,method="fdr")
+ 
+
+
+############################################
+############################################
+### CORTICAL THICKNESS ANALYSES (NO TBV) ###
+######### Full sample (n=1601) #############
+############################################
+############################################
+#CT data: cortical thickness data from JLF: i.e., mprage_jlf_ct_*
+
+#############################
+#### STATE TRAIT ANXIETY ####
+#############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllSubj_Stai_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Stai_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllSubj_Gm_State <- sapply(CT_NoTBV_AllSubj_Stai_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Gm_Trait <- sapply(CT_NoTBV_AllSubj_Stai_Gm, function(v) summary(v)$p.table[4,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllSubj_Stai_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Stai_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_Lobes_State <- sapply(CT_NoTBV_AllSubj_Stai_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Lobes_Trait <- sapply(CT_NoTBV_AllSubj_Stai_Lobes, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_Lobes_State_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_State,method="fdr")
+CT_NoTBV_AllSubj_Lobes_Trait_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_Trait,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllSubj_Stai_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + State_General + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Stai_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_ROIs_State <- sapply(CT_NoTBV_AllSubj_Stai_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_ROIs_Trait <- sapply(CT_NoTBV_AllSubj_Stai_ROIs, function(v) summary(v)$p.table[4,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_ROIs_State_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_State,method="fdr")
+CT_NoTBV_AllSubj_ROIs_Trait_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_Trait,method="fdr")
+
+
+
+############################
+#### TRAIT ANXIETY ONLY ####
+############################
+
+###GM###
+#GAM model
+CT_NoTBV_AllSubj_Trait_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Trait_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllSubj_Gm_TraitOnly <- sapply(CT_NoTBV_AllSubj_Trait_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllSubj_Trait_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Trait_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_Lobes_TraitOnly <- sapply(CT_NoTBV_AllSubj_Trait_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_Lobes_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_TraitOnly,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllSubj_Trait_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Trait_General, list(i = as.name(x))), data = staiSubjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Trait_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_ROIs_TraitOnly <- sapply(CT_NoTBV_AllSubj_Trait_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_ROIs_TraitOnly_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_TraitOnly,method="fdr")
+
+
+
+##############################################
+#### CORRELATED TRAITS- NOT AGE REGRESSED ####
+##############################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllSubj_CorrTrMood_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrPsych_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrExt_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrFear_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_CorrTrMood_Gm, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrPsych_Gm, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrExt_Gm, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrFear_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllSubj_Gm_CorrTrMood <- sapply(CT_NoTBV_AllSubj_CorrTrMood_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Gm_CorrTrPsych <- sapply(CT_NoTBV_AllSubj_CorrTrPsych_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Gm_CorrTrExt <- sapply(CT_NoTBV_AllSubj_CorrTrExt_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Gm_CorrTrFear <- sapply(CT_NoTBV_AllSubj_CorrTrFear_Gm, function(v) summary(v)$p.table[3,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllSubj_CorrTrMood_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrPsych_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrExt_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrFear_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_CorrTrMood_Lobes, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrPsych_Lobes, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrExt_Lobes, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrFear_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_Lobes_CorrTrMood <- sapply(CT_NoTBV_AllSubj_CorrTrMood_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Lobes_CorrTrPsych <- sapply(CT_NoTBV_AllSubj_CorrTrPsych_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Lobes_CorrTrExt <- sapply(CT_NoTBV_AllSubj_CorrTrExt_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Lobes_CorrTrFear <- sapply(CT_NoTBV_AllSubj_CorrTrFear_Lobes, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_Lobes_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_CorrTrMood,method="fdr")
+CT_NoTBV_AllSubj_Lobes_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_CorrTrPsych,method="fdr")
+CT_NoTBV_AllSubj_Lobes_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_CorrTrExt,method="fdr")
+CT_NoTBV_AllSubj_Lobes_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_CorrTrFear,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllSubj_CorrTrMood_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Mood, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrPsych_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Psychosis, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrExt_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Externalizing, list(i = as.name(x))), data = subjData)
+})
+
+CT_NoTBV_AllSubj_CorrTrFear_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + Fear, list(i = as.name(x))), data = subjData)
+})
+
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_CorrTrMood_ROIs, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrPsych_ROIs, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrExt_ROIs, summary)
+lapply(CT_NoTBV_AllSubj_CorrTrFear_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_ROIs_CorrTrMood <- sapply(CT_NoTBV_AllSubj_CorrTrMood_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_ROIs_CorrTrPsych <- sapply(CT_NoTBV_AllSubj_CorrTrPsych_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_ROIs_CorrTrExt <- sapply(CT_NoTBV_AllSubj_CorrTrExt_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_ROIs_CorrTrFear <- sapply(CT_NoTBV_AllSubj_CorrTrFear_ROIs, function(v) summary(v)$p.table[3,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_ROIs_CorrTrMood_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_CorrTrMood,method="fdr")
+CT_NoTBV_AllSubj_ROIs_CorrTrPsych_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_CorrTrPsych,method="fdr")
+CT_NoTBV_AllSubj_ROIs_CorrTrExt_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_CorrTrExt,method="fdr")
+CT_NoTBV_AllSubj_ROIs_CorrTrFear_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_CorrTrFear,method="fdr")
+
+
+
+###################################
+#### PSYCHOPATHOLOGY BIFACTORS ####
+###################################
+
+###GM###
+#GAM model
+CT_NoTBV_AllSubj_Bifactors_Gm <- lapply(CT_Gm_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Bifactors_Gm, summary)
+
+#Create a vector p-values (fdr correction not used because only one DV was tested)
+CT_NoTBV_AllSubj_Gm_Mood <- sapply(CT_NoTBV_AllSubj_Bifactors_Gm, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Gm_Psych <- sapply(CT_NoTBV_AllSubj_Bifactors_Gm, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllSubj_Gm_Ext <- sapply(CT_NoTBV_AllSubj_Bifactors_Gm, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllSubj_Gm_Phb <- sapply(CT_NoTBV_AllSubj_Bifactors_Gm, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllSubj_Gm_OverallPsy <- sapply(CT_NoTBV_AllSubj_Bifactors_Gm, function(v) summary(v)$p.table[7,4])
+
+
+###LOBES###
+#GAM model
+CT_NoTBV_AllSubj_Bifactors_Lobes <- lapply(CT_Lobe_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Bifactors_Lobes, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_Lobes_Mood <- sapply(CT_NoTBV_AllSubj_Bifactors_Lobes, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_Lobes_Psych <- sapply(CT_NoTBV_AllSubj_Bifactors_Lobes, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllSubj_Lobes_Ext <- sapply(CT_NoTBV_AllSubj_Bifactors_Lobes, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllSubj_Lobes_Phb <- sapply(CT_NoTBV_AllSubj_Bifactors_Lobes, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllSubj_Lobes_OverallPsy <- sapply(CT_NoTBV_AllSubj_Bifactors_Lobes, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_Lobes_Mood_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_Mood,method="fdr")
+CT_NoTBV_AllSubj_Lobes_Psych_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_Psych,method="fdr")
+CT_NoTBV_AllSubj_Lobes_Ext_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_Ext,method="fdr")
+CT_NoTBV_AllSubj_Lobes_Phb_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_Phb,method="fdr")
+CT_NoTBV_AllSubj_Lobes_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllSubj_Lobes_OverallPsy,method="fdr")
+
+
+###ROIs###
+#GAM model
+CT_NoTBV_AllSubj_Bifactors_ROIs <- lapply(CT_ROI_List, function(x) {
+    gam(substitute(i ~ s(age) + sex + goassessItemBifactor4FactorMood +  goassessItemBifactor4FactorPsych +  goassessItemBifactor4FactorExt
+        +  goassessItemBifactor4FactorPhb +  goassessItemBifactor4FactorOverallPsy, list(i = as.name(x))), data = subjData)
+})
+
+#Look at the model summaries
+lapply(CT_NoTBV_AllSubj_Bifactors_ROIs, summary)
+
+#Create a vector p-values
+CT_NoTBV_AllSubj_ROIs_Mood <- sapply(CT_NoTBV_AllSubj_Bifactors_ROIs, function(v) summary(v)$p.table[3,4])
+CT_NoTBV_AllSubj_ROIs_Psych <- sapply(CT_NoTBV_AllSubj_Bifactors_ROIs, function(v) summary(v)$p.table[4,4])
+CT_NoTBV_AllSubj_ROIs_Ext <- sapply(CT_NoTBV_AllSubj_Bifactors_ROIs, function(v) summary(v)$p.table[5,4])
+CT_NoTBV_AllSubj_ROIs_Phb <- sapply(CT_NoTBV_AllSubj_Bifactors_ROIs, function(v) summary(v)$p.table[6,4])
+CT_NoTBV_AllSubj_ROIs_OverallPsy <- sapply(CT_NoTBV_AllSubj_Bifactors_ROIs, function(v) summary(v)$p.table[7,4])
+
+#FDR correct p-values
+CT_NoTBV_AllSubj_ROIs_Mood_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_Mood,method="fdr")
+CT_NoTBV_AllSubj_ROIs_Psych_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_Psych,method="fdr")
+CT_NoTBV_AllSubj_ROIs_Ext_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_Ext,method="fdr")
+CT_NoTBV_AllSubj_ROIs_Phb_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_Phb,method="fdr")
+CT_NoTBV_AllSubj_ROIs_OverallPsy_fdr <- p.adjust(CT_NoTBV_AllSubj_ROIs_OverallPsy,method="fdr")
+
+

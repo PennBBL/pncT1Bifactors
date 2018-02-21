@@ -1,0 +1,34 @@
+#Get the Ravens paths.
+
+#cat /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/bblids_scanids_date.csv | while IFS="," read -r a b c ;
+
+#do
+
+#dir="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/images/Smoothed_Masked_Ravens/"
+
+#path=`ls -d "$dir"/${a}*`;
+
+#fileName=`echo $path | cut -d " " -f1`;
+
+#echo $a,$b,$fileName >> /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_RavensPaths_smoothedMasked.csv
+
+#done
+
+#!/bin/bash
+subjList=$(cat /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/bblids.txt)
+
+for i in $subjList; do
+        echo ""
+        echo $i
+	dir="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/images/Smoothed_Masked_Ravens/"                                                                      
+	path="$dir"$i'*.nii.gz'       
+	echo $path
+	echo $i,$path >> /data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/subjectData/n1385_RavensPaths_smoothedMasked.csv
+done
+
+
+#DIR="/data/joy/BBL/projects/pncT1AcrossDisorder_Kaczkurkin/images/Smoothed_Masked_Ravens"
+#for f in "$DIR"/*.gz
+#do
+#echo "${f}"
+#done

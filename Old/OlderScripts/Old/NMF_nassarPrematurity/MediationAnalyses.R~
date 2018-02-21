@@ -1,0 +1,60 @@
+############################
+#### MEDIATION ANALYSES ####
+############################
+
+#Load data
+subjData<-read.csv("/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/MergedNMF_20170306.csv", header=TRUE, na.strings="NA")
+
+#Load packages
+library(lavaan)
+#install_load('caret', 'lavaan', 'semPlot')
+
+#z-score X, M, and Y
+X <- scale(subjData$ga)
+
+M <- scale(subjData$Nmf18C1)
+
+Y <- scale(subjData$Overall_Accuracy)
+
+#Add variables of interest into a dataframe
+Data <- data.frame(X = X, Y = Y, M = M)
+
+model <- ' # "c path" (X->Y)
+
+             Y ~ c*X
+
+           # "a path" (X->M)
+
+             M ~ a*X
+
+          # "b path" (M->Y)
+
+             Y ~ b*M
+
+          # "c-prime path" (effect of X on Y controlling for M; want this to be less signif or non-signif compared to "c path")
+
+             Y ~ c*X + b*M
+
+          # indirect effect (a*b) ("c-c prime"; amount of mediation)
+
+             ab := a*b
+
+          # total effect (direct effect + indirect effect)
+
+             total := c + (a*b)
+
+         '
+
+fit <- sem(model, data = Data, se="bootstrap", bootstrap=10000)
+
+summary(fit, fit.measures=TRUE, standardize=TRUE, rsquare=TRUE)
+
+boot.fit <- parameterEstimates(fit, boot.ci.type="perc",level=0.95, ci=TRUE,standardized = TRUE)
+
+boot.fit
+
+#pdf('testMediationTriangle.pdf')
+#semPaths(fit, what='std',title = FALSE, edge.label.cex=1.5, residuals = F)
+#dev.off()
+
+
