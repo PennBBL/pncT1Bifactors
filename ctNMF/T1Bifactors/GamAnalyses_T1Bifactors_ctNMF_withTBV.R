@@ -1,19 +1,19 @@
 ##########################################
-#### GAM MODELS FOR T1 Bifactor STUDY ####
+#### GAM MODELS FOR T1 BIFACTOR STUDY ####
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
 
 #Run gam models (with TBV)
 NmfModels <- lapply(nmfComponents, function(x) {
-  gam(substitute(i ~ s(age) + sex + mprage_antsCT_vol_TBV + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
+  gam(substitute(i ~ s(age) + sex + averageManualRating + mprage_antsCT_vol_TBV + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
 })
 
 #Look at model summaries
@@ -24,7 +24,7 @@ models <- lapply(NmfModels, summary)
 ######################
 
 #Pull p-values
-p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[4,4])
+p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[5,4])
 
 #Convert to data frame
 p_mood <- as.data.frame(p_mood)
@@ -61,7 +61,7 @@ Nmf_mood_uncorrected_p_names <- nmfComponents[as.numeric(Nmf_mood_uncorrected_p 
 ###########################
 
 #Pull p-values
-p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[5,4])
+p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
 
 #Convert to data frame
 p_psy <- as.data.frame(p_psy)
@@ -98,7 +98,7 @@ Nmf_psy_uncorrected_p_names <- nmfComponents[as.numeric(Nmf_psy_uncorrected_p )]
 ########################################
 
 #Pull p-values
-p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
+p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
 
 #Convert to data frame
 p_ext <- as.data.frame(p_ext)
@@ -135,7 +135,7 @@ Nmf_ext_uncorrected_p_names <- nmfComponents[as.numeric(Nmf_ext_uncorrected_p )]
 ##############################
 
 #Pull p-values
-p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
+p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
 
 #Convert to data frame
 p_fear <- as.data.frame(p_fear)
@@ -172,7 +172,7 @@ Nmf_fear_uncorrected_p_names <- nmfComponents[as.numeric(Nmf_fear_uncorrected_p 
 #########################################
 
 #Pull p-values
-p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
+p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[9,4])
 
 #Convert to data frame
 p_overall <- as.data.frame(p_overall)

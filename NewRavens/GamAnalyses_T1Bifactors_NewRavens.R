@@ -1,15 +1,15 @@
 ##########################################
-#### GAM MODELS FOR T1 BIFACTOR STUDY ####
+#### GAM MODELS FOR T1 Bifactor STUDY ####
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1239_T1_subjData_NoPsychMeds.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ravens_Nmf18",names(data.NMF))]
 
 #Run gam models (GAM without TBV)
 NmfModels <- lapply(nmfComponents, function(x) {
@@ -173,4 +173,3 @@ Nmf_overall_fdr_names <- nmfComponents[as.numeric(Nmf_overall_fdr)]
 
 #To check direction of coefficient estimates
 overall_coeff <- models[as.numeric(Nmf_overall_fdr)]
-

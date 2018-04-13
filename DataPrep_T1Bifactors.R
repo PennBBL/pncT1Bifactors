@@ -3,59 +3,59 @@
 #################
 
 ##Demographic data (n=1629)
-data.demo <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/demographics/n1601_demographics_go1_20161212.csv", header=TRUE, na.strings="") 
+data.demo <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/demographics/n1601_demographics_go1_20161212.csv", header=TRUE, na.strings="") 
 
 ##Clinical data
 #Screening diagnoses (n=1601) (no missing values)
-data.diag <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_psych_summary_vars_20131014.csv", header=TRUE)
+data.diag <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_psych_summary_vars_20131014.csv", header=TRUE)
 
 #Psychosis clinical group (n=1601)
-data.psychosis <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_diagnosis_dxpmr_20170509.csv", header=TRUE, na.strings="")
+data.psychosis <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_diagnosis_dxpmr_20170509.csv", header=TRUE, na.strings="")
 
 #Suicide variables (n=1601)
-data.suicide <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_smryvars_suicide_20170209.csv", header=TRUE, na.strings="")
+data.suicide <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_smryvars_suicide_20170209.csv", header=TRUE, na.strings="")
 
 #Item level GOASSESS (n=1601)
-data.goItems <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_112_itemwise_vars_20161214.csv", header=TRUE, na.strings="")
+data.goItems <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_112_itemwise_vars_20161214.csv", header=TRUE, na.strings="")
 
 #Bifactors (n=1601)
-data.bifactors <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_bifactor_scores_20161219.csv", header=TRUE, na.strings="")
+data.bifactors <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_bifactor_scores_20161219.csv", header=TRUE, na.strings="")
 
 #Correlated traits (n=1601)
-data.corrTraits <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_corrtraits_scores_20161219.csv", header=TRUE, na.strings="")
+data.corrTraits <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_corrtraits_scores_20161219.csv", header=TRUE, na.strings="")
 
 #Correlated traits self regressed (n=1601)
-data.corrTraits_sr <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_fscores_self_regressed_20170131.csv", header=TRUE, na.strings="")
+data.corrTraits_sr <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_goassess_itemwise_fscores_self_regressed_20170131.csv", header=TRUE, na.strings="")
 
 #State trait anxiety data (n=1391)
-data.stai <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_stai_pre_post_itemwise_smry_factors_20170131.csv", header=TRUE, na.strings="")
+data.stai <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/clinical/n1601_stai_pre_post_itemwise_smry_factors_20170131.csv", header=TRUE, na.strings="")
 
 ##Cognitive data
 #Summary factor scores (n=1601)
-data.cogFactors <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_factor_scores_tymoore_20151006.csv", header=TRUE, na.strings="")
+data.cogFactors <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_factor_scores_tymoore_20151006.csv", header=TRUE, na.strings="")
 
 #z-scores for the 14 subtests (n=1601)
-data.cogZscores <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_zscores_all_fr_20161215.csv", header=TRUE, na.strings="")
+data.cogZscores <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_zscores_all_fr_20161215.csv", header=TRUE, na.strings="")
 
 #WRAT scores (n=1601)
-data.wrat <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_wrat_scores_20161215.csv", header=TRUE, na.strings="")
+data.wrat <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/cnb/n1601_cnb_wrat_scores_20161215.csv", header=TRUE, na.strings="")
 
 ##Environment 
 #SES (n=1601)
-data.envir <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/environment/n1601_go1_environment_factor_scores_tymoore_20150909.csv", header=TRUE, na.strings="NA")
+data.envir <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/environment/n1601_go1_environment_factor_scores_tymoore_20150909.csv", header=TRUE, na.strings="NA")
 
 ##Exclusion data
 #Health exclusion (use the new healthExcludev2 variable) (n=1601; no missing values)
-data.healthExclude <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/health/n1601_health_20170421.csv", header=TRUE)
+data.healthExclude <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/health/n1601_health_20170421.csv", header=TRUE)
 
 #T1 QA exclusion (n=1601)
-data.t1QA <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_t1QaData_20170306.csv", header=TRUE, na.strings="NA")
+data.t1QA <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_t1QaData_20170306.csv", header=TRUE, na.strings="NA")
 
 #Asl QA exclusion (n=1601)
-data.aslQA <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_PcaslQaData_20170403.csv", header=TRUE, na.strings="NA")
+data.aslQA <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_PcaslQaData_20170403.csv", header=TRUE, na.strings="NA")
 
 #Resting state connectivity QA exclusion (n=1601)
-data.restQA <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_RestQAData_20170714.csv", header=TRUE, na.strings="NA")
+data.restQA <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_RestQAData_20170714.csv", header=TRUE, na.strings="NA")
 
 ##Brain data
 #NMF components (n=1396) (no missing values)
@@ -63,30 +63,37 @@ data.CtNMF <- read.csv("/data/jux/BBL/projects/pncNmf/subjectData/n1396_Nmf18Bas
 data.RavensNMF <- read.csv("/data/jux/BBL/projects/pncNmf/subjectData/n1396_Nmf26Bases_Ravens_bblids.csv", header=TRUE)
 
 #JLF T1 ROIs (n=1601; no missing values)
-data.ct <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfAntsCTIntersectionCT_20170331.csv", header=TRUE)
-data.vol <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfAntsCTIntersectionVol_20170412.csv", header=TRUE)
+data.ct <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfAntsCTIntersectionCT_20170331.csv", header=TRUE)
+data.vol <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfAntsCTIntersectionVol_20170412.csv", header=TRUE)
 
-#Volume	 Lobes (n=1601)
-data.volLobes <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfWmVol_20170412.csv", header=TRUE)
+#T1 Lobes (n=1601)
+data.ctLobes <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1601_jlfWmCt_20180328.csv", header=TRUE)
+data.volLobes <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_jlfWmVol_20170412.csv", header=TRUE)
 
 #JLF total brain volume (TBV) (n=1601; no missing values)
-data.tbv <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_ctVol20170412.csv", header=TRUE)
+data.tbv <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/t1struct/n1601_ctVol20170412.csv", header=TRUE)
 
 #JLF ASL ROIs (n=1601)
-data.asl <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_jlfAntsCTIntersectionPcaslValues_20170403.csv", header=TRUE, na.strings="NA")
+data.asl <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_jlfAntsCTIntersectionPcaslValues_20170403.csv", header=TRUE, na.strings="NA")
 
 #ASL Lobes (n=1601)
-data.aslLobes <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_jlfWMPcasl_20170412.csv", header=TRUE, na.strings="NA")
+data.aslLobes <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/asl/n1601_jlfWMPcasl_20170412.csv", header=TRUE, na.strings="NA")
 
 #JLF resting state connectivity ROIs (n=1601)
-data.rest.alff <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfALFFValues_20170714.csv", header=TRUE, na.strings="NA")
-data.rest.reho <- read.csv("/data/jux/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfReHoValues_20170714.csv", header=TRUE, na.strings="NA")
+data.rest.alff <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfALFFValues_20170714.csv", header=TRUE, na.strings="NA")
+data.rest.reho <- read.csv("/data/joy/BBL/studies/pnc/n1601_dataFreeze/neuroimaging/rest/n1601_jlfReHoValues_20170714.csv", header=TRUE, na.strings="NA")
 
 #Freesurfer SurfaceArea 
 data.fs.sa <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1601_freesurferSurfaceArea_20180213.csv", header=TRUE)
 
 #Freesurfer CorticalThickness
 data.fs.ct <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1601_freesurferCt_20180213.csv", header=TRUE)
+
+#Jacobian volume (18 CT NMF components applied to Jacobian volume images)
+data.jacobian <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/cmpWeightedAverageNumBases_18_jacobian.csv", header=FALSE)
+
+#18 Ravens components (18 CT NMF components applied to Ravens volume images)
+data.18Ravens <- read.csv("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/cmpWeightedAverageNumBases_18_ravens.csv", header=FALSE)
 
 #################
 ### DATA PREP ###
@@ -120,6 +127,183 @@ data.suicide$sui002 <- as.factor(data.suicide$sui002)
 data.goItems$sui001 <- NULL
 data.goItems$sui002 <- NULL
 
+#####################################################
+### REMOVE REDUNDANT VARIABLES IN FREESURFER DATA ###
+#####################################################
+
+#These variables are identical in both freesufer files; only need to keep one copy
+data.fs.sa$LThickness <- NULL
+data.fs.sa$RThickness <- NULL
+data.fs.sa$LSurfArea <- NULL
+data.fs.sa$RSurfArea <- NULL
+data.fs.sa$ICV <- NULL
+
+#############################
+### PREPARE JACOBIAN DATA ###
+#############################
+
+#Remove path to get scan ID only
+data.jacobian[] <- lapply(data.jacobian, function(x) gsub("/cbica/projects/pncNmf/n1396_t1NMF/images/Jacobian_ReslicedDownsampledSmoothed2mm/", "", x))
+data.jacobian[] <- lapply(data.jacobian, function(x) gsub("_SubjectToTemplateLogJacobian_isotropic2mm_smoothed2mm.nii.gz", "", x))
+
+#Rename variables
+colnames(data.jacobian) <- c("scanid","jacobian_Nmf18C1","jacobian_Nmf18C2","jacobian_Nmf18C3","jacobian_Nmf18C4","jacobian_Nmf18C5","jacobian_Nmf18C6","jacobian_Nmf18C7","jacobian_Nmf18C8","jacobian_Nmf18C9","jacobian_Nmf18C10","jacobian_Nmf18C11","jacobian_Nmf18C12","jacobian_Nmf18C13","jacobian_Nmf18C14","jacobian_Nmf18C15","jacobian_Nmf18C16","jacobian_Nmf18C17","jacobian_Nmf18C18")
+
+#Make Jacobian variables numeric
+data.jacobian <- data.frame(lapply(data.jacobian, function(x) as.numeric(as.character(x))))
+
+#########################################
+### PREPARE 18 RAVENS COMPONENTS DATA ###
+#########################################
+
+#Remove path to get scan ID only
+data.18Ravens[] <- lapply(data.18Ravens, function(x) gsub("/cbica/projects/pncNmf/n1396_t1NMF/images/Ravens_smoothed8mm/", "", x))
+data.18Ravens[] <- lapply(data.18Ravens, function(x) gsub("_RAVENS_2GM_2mm_smoothed8mm.nii.gz", "", x))
+
+#Rename variables
+colnames(data.18Ravens) <- c("scanid","Ravens_Nmf18C1","Ravens_Nmf18C2","Ravens_Nmf18C3","Ravens_Nmf18C4","Ravens_Nmf18C5","Ravens_Nmf18C6","Ravens_Nmf18C7","Ravens_Nmf18C8","Ravens_Nmf18C9","Ravens_Nmf18C10","Ravens_Nmf18C11","Ravens_Nmf18C12","Ravens_Nmf18C13","Ravens_Nmf18C14","Ravens_Nmf18C15","Ravens_Nmf18C16","Ravens_Nmf18C17","Ravens_Nmf18C18")
+
+#Make Ravens variables numeric
+data.18Ravens <- data.frame(lapply(data.18Ravens, function(x) as.numeric(as.character(x))))
+
+###################################
+### CREATE TOTAL LOBE VARIABLES ###
+###################################
+
+#For cortical thickness, AVERAGE the left and right hemispheres (ct units = mm)
+data.ctLobes$mprage_jlfLobe_ct_Limbic_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Limbic_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Limbic_Lobe)/2
+data.ctLobes$mprage_jlfLobe_ct_Insular_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Insular_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Insular_Lobe)/2
+data.ctLobes$mprage_jlfLobe_ct_Frontal_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Frontal_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Frontal_Lobe)/2
+data.ctLobes$mprage_jlfLobe_ct_Parietal_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Parietal_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Parietal_Lobe)/2
+data.ctLobes$mprage_jlfLobe_ct_Occipital_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Occipital_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Occipital_Lobe)/2
+data.ctLobes$mprage_jlfLobe_ct_Temporal_Lobe <- (data.ctLobes$mprage_jlfLobe_ct_L_Temporal_Lobe + data.ctLobes$mprage_jlfLobe_ct_R_Temporal_Lobe)/2
+
+#For volume, SUM the left and right hemispheres and then divide by 1000 to change the units from cubic millimeters (mm3) to cubic centimeters (cc3); 1 cc3 = 1,000 mm3
+data.volLobes$mprage_jlf_vol_Limbic_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Limbic_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Limbic_Lobe_WM)/1000
+data.volLobes$mprage_jlf_vol_Insular_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Insular_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Insular_Lobe_WM)/1000
+data.volLobes$mprage_jlf_vol_Frontal_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Frontal_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Frontal_Lobe_WM)/1000
+data.volLobes$mprage_jlf_vol_Parietal_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Parietal_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Parietal_Lobe_WM)/1000
+data.volLobes$mprage_jlf_vol_Occipital_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Occipital_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Occipital_Lobe_WM)/1000
+data.volLobes$mprage_jlf_vol_Temporal_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Temporal_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Temporal_Lobe_WM)/1000
+
+######################################################################################################
+###VOLUME###
+
+#NOTE: total volumes per tissue class (GM, Wm, and CBF) already exist as variables in the "n1601_ctVol20170412.csv" data file and do not need to be recreated.
+#But total GM does not exist in the CT or GMD files and needs to be made.
+
+#ALL ROIS
+#dataVol <- data.vol[,grep("mprage_jlf_vol",names(data.vol))]
+
+#GM: these are the gray matter regions (112 regions) 
+#dataVolGm <- dataVol[,-grep("Vent|Brain_Stem|Cerebell|Cerebral_White_Matter|CSF|Lobe_WM",names(dataVol))]
+
+#Get total GM volume
+#dataVolGm <- data.matrix(dataVolGm)
+#data.vol$mprage_antsCT_vol_GrayMatter2 <- rowSums(dataVolGm)
+
+#WM: these are the white matter regions (4 regions)
+#dataVolWm <- dataVol[,(unique(c( grep("White_Matter",names(dataVol)) )))]
+
+#Get total WM volume
+#dataVolWm <- data.matrix(dataVolWm)
+#data.vol$mprage_antsCT_vol_WhiteMatter2 <- rowSums(dataVolWm)
+
+#CSF: CSF and ventricles (7 regions)
+#dataVolCsf <- dataVol[,c(grep("CSF",names(dataVol)),grep("Vent",names(dataVol)))]
+
+#Get total CSF
+#dataVolCsf <- data.matrix(dataVolCsf)
+#data.vol$mprage_antsCT_vol_CSF2 <- rowSums(dataVolCsf)
+
+###CORTICAL THICKNESS###
+
+#GM: all of the JLF CT variables are GM regions; WM and CSF don't make sense for CT
+#dataCTGm <- data.ct[,grep("mprage_jlf_ct",names(data.ct))]
+
+#Get total GM volume
+#dataCTGm <- data.matrix(dataCTGm)
+#data.ct$mprage_antsCT_ct_GrayMatter <- rowSums(dataCTGm)
+
+##############################
+### SEPARATE GM INTO LOBES ###
+##############################
+
+###VOLUME###
+
+#subcortical (14 regions)
+#dataVolSubcort <- dataVol[,c(grep("Accumbens",names(dataVol)), grep("Amygdala",names(dataVol)), grep("Caudate",names(dataVol)), grep("Hippocampus",names(dataVol)),
+#        grep("Pallidum",names(dataVol)), grep("Putamen",names(dataVol)), grep("Thalamus",names(dataVol)))]
+
+#frontal (50 regions)
+#dataVolFrontal <- dataVol[,unique(c(grep("OrG",names(dataVol)), grep("ins",names(dataVol)), grep("FRP",names(dataVol)), grep("FG",names(dataVol)),
+#        grep("PrG",names(dataVol)), grep("Gre",names(dataVol)), grep("MFC",names(dataVol)), grep("SCA",names(dataVol)), grep("SMC",names(dataVol)),
+#        grep("FRP",names(dataVol)),grep("CO",names(dataVol)), grep("FO",names(dataVol)), grep("PO",names(dataVol)), grep("CgG",names(dataVol))))]
+
+
+
+#occipital (16 regions)
+#dataVolOccipital <- dataVol[,unique(c(grep("OG",names(dataVol)), grep("OFuG",names(dataVol)), grep("OCP",names(dataVol)), grep("SOG",names(dataVol)),
+#        grep("Calc",names(dataVol)), grep("Cun",names(dataVol)), grep("LiG",names(dataVol))))]
+
+#parietal (12 regions)
+#dataVolParietal <- dataVol[,unique(c(grep("AnG",names(dataVol)), grep("PoG",names(dataVol)), grep("SMG",names(dataVol)), grep("SPL",names(dataVol)),
+#        grep("Pcu",names(dataVol))))]
+
+#temporal (20 regions)
+#dataVolTemporal <- dataVol[,unique(c(grep("_FuG",names(dataVol)), grep("TG",names(dataVol)), grep("TMP",names(dataVol)), grep("PP",names(dataVol)),
+#        grep("PT",names(dataVol)), grep("PHG",names(dataVol)),grep("Ent",names(dataVol))))]
+
+#get total volume for GM lobes (Divide by 1000 to change the units from cubic millimeters to cubic centimeters (cc); 1 cc = 1,000 mm3)
+#dataVolCereb <- data.matrix(dataVolCereb)
+#subjData$Vol_gmCerebTotal <- rowSums(dataVolCereb)/1000
+#dataVolSubcort <- data.matrix(dataVolSubcort)
+#subjData$Vol_gmSubcortTotal <- rowSums(dataVolSubcort)/1000
+#dataVolFrontal <- data.matrix(dataVolFrontal)
+#subjData$Vol_gmFrontalTotal <- rowSums(dataVolFrontal)/1000
+#dataVolOccipital <- data.matrix(dataVolOccipital)
+#subjData$Vol_gmOccipitalTotal <- rowSums(dataVolOccipital)/1000
+#dataVolParietal <- data.matrix(dataVolParietal)
+#subjData$Vol_gmParietalTotal <- rowSums(dataVolParietal)/1000
+#dataVolTemporal <- data.matrix(dataVolTemporal)
+#subjData$Vol_gmTemporalTotal <- rowSums(dataVolTemporal)/1000
+
+#Change units for total GM/WM/CSF volumes to cc's
+#subjData$mprage_antsCT_vol_GrayMatter <- subjData$mprage_antsCT_vol_GrayMatter/1000
+#subjData$mprage_antsCT_vol_WhiteMatter <- subjData$mprage_antsCT_vol_WhiteMatter/1000
+#subjData$mprage_antsCT_vol_CSF <- subjData$mprage_antsCT_vol_CSF/1000
+
+
+###CORTICAL THICKNESS###
+
+#cerebellum and subcortical don't apply to JLF CT data.
+
+#frontal (50 regions)
+#dataCTFrontal <- dataCT[,unique(c(grep("OrG",names(dataCT)), grep("ins",names(dataCT)), grep("FRP",names(dataCT)), grep("FG",names(dataCT)),
+#        grep("PrG",names(dataCT)), grep("Gre",names(dataCT)), grep("MFC",names(dataCT)), grep("SCA",names(dataCT)), grep("SMC",names(dataCT)),
+#        grep("FRP",names(dataCT)),grep("CO",names(dataCT)), grep("FO",names(dataCT)), grep("PO",names(dataCT)), grep("CgG",names(dataCT))))]
+
+#occipital (16 regions)
+#dataCTOccipital <- dataCT[,unique(c(grep("OG",names(dataCT)), grep("OFuG",names(dataCT)), grep("OCP",names(dataCT)), grep("SOG",names(dataCT)),
+#        grep("Calc",names(dataCT)), grep("Cun",names(dataCT)), grep("LiG",names(dataCT))))]
+
+#parietal (12 regions)
+#dataCTParietal <- dataCT[,unique(c(grep("AnG",names(dataCT)), grep("PoG",names(dataCT)), grep("SMG",names(dataCT)), grep("SPL",names(dataCT)),
+#        grep("Pcu",names(dataCT))))]
+
+#temporal (20 regions)
+#dataCTTemporal <- dataCT[,unique(c(grep("_FuG",names(dataCT)), grep("TG",names(dataCT)), grep("TMP",names(dataCT)), grep("PP",names(dataCT)),
+#        grep("PT",names(dataCT)), grep("PHG",names(dataCT)),grep("Ent",names(dataCT))))]
+
+#get total volume for GM subdivisions
+#dataCTFrontal <- data.matrix(dataCTFrontal)
+#subjData$CT_gmFrontalTotal <- rowSums(dataCTFrontal)
+#dataCTOccipital <- data.matrix(dataCTOccipital)
+#subjData$CT_gmOccipitalTotal <- rowSums(dataCTOccipital)
+#dataCTParietal <- data.matrix(dataCTParietal)
+#subjData$CT_gmParietalTotal <- rowSums(dataCTParietal)
+#dataCTTemporal <- data.matrix(dataCTTemporal)
+#subjData$CT_gmTemporalTotal <- rowSums(dataCTTemporal)
 
 ##################
 ### MERGE DATA ###
@@ -144,24 +328,26 @@ dataMerge17 <- merge(dataMerge16,data.CtNMF, by=c("bblid","scanid"), all=TRUE)
 dataMerge18 <- merge(dataMerge17,data.RavensNMF, by=c("bblid","scanid"), all=TRUE)
 dataMerge19 <- merge(dataMerge18,data.ct, by=c("bblid","scanid"), all=TRUE)
 dataMerge20 <- merge(dataMerge19,data.vol, by=c("bblid","scanid"), all=TRUE)
-dataMerge21 <- merge(dataMerge20,data.volLobes, by=c("bblid","scanid"), all=TRUE)
-dataMerge22 <- merge(dataMerge21,data.tbv, by=c("bblid","scanid"), all=TRUE)
-dataMerge23 <- merge(dataMerge22,data.asl, by=c("bblid","scanid"), all=TRUE)
-dataMerge24 <- merge(dataMerge23,data.aslLobes, by=c("bblid","scanid"), all=TRUE)
-dataMerge25 <- merge(dataMerge24,data.rest.alff, by=c("bblid","scanid"), all=TRUE)
-dataMerge26 <- merge(dataMerge25,data.rest.reho, by=c("bblid","scanid"), all=TRUE)
-dataMerge27 <- merge(dataMerge26,data.fs.sa, by=c("bblid","scanid"), all=TRUE)
-dataMerge28 <- merge(dataMerge27,data.fs.ct, by=c("bblid","scanid"), all=TRUE)
+dataMerge21 <- merge(dataMerge20,data.ctLobes, by=c("bblid","scanid"), all=TRUE)
+dataMerge22 <- merge(dataMerge21,data.volLobes, by=c("bblid","scanid"), all=TRUE)
+dataMerge23 <- merge(dataMerge22,data.tbv, by=c("bblid","scanid"), all=TRUE)
+dataMerge24 <- merge(dataMerge23,data.asl, by=c("bblid","scanid"), all=TRUE)
+dataMerge25 <- merge(dataMerge24,data.aslLobes, by=c("bblid","scanid"), all=TRUE)
+dataMerge26 <- merge(dataMerge25,data.rest.alff, by=c("bblid","scanid"), all=TRUE)
+dataMerge27 <- merge(dataMerge26,data.rest.reho, by=c("bblid","scanid"), all=TRUE)
+dataMerge28 <- merge(dataMerge27,data.fs.sa, by=c("bblid","scanid"), all=TRUE)
+dataMerge29 <- merge(dataMerge28,data.fs.ct, by=c("bblid","scanid"), all=TRUE)
+dataMerge30 <- merge(dataMerge29,data.jacobian, by="scanid", all=TRUE)
+dataMerge31 <- merge(dataMerge30,data.18Ravens, by="scanid", all=TRUE)
 
 #Retain only the 1601 bblids (demographics has 1629)
-data.n1601 <- dataMerge28[match(data.t1QA$bblid, dataMerge28$bblid, nomatch=0),] 
+data.n1601 <- dataMerge31[match(data.t1QA$bblid, dataMerge31$bblid, nomatch=0),] 
 
 #Put bblids in ascending order
 data.ordered <- data.n1601[order(data.n1601$bblid),]
 
 #Count the number of subjects (should be 1601) (After run script, type n on R command line to see the number of subjects you have. If not 1601, MAJOR PROBLEM)
 n <- nrow(data.ordered)
-
 
 ########################
 ### APPLY EXCLUSIONS ### 
@@ -207,22 +393,32 @@ t1QA.exclude<-1447-t1QA.include
 data.exclude <- data.subset[which(data.subset$healthExcludev2==0 & data.subset$t1Exclude == 0 ),]
 n_health_t1 <- nrow(data.exclude)
 
-##Count the number taking psychotropic psychiatric medications
-#Included: n=1240; Excluded for meds: n=156
-data.exclude$ACROSS.INCLUDE.psychMeds <- 1
-data.exclude$ACROSS.INCLUDE.psychMeds[data.exclude$psychoactiveMedPsychv2==1] <- 0
-psychMeds.include<-sum(data.exclude$ACROSS.INCLUDE.psychMeds)
-psychMeds.exclude<-1396-psychMeds.include
+##Count the number missing clinical data
+#Included: n=1394; Excluded: n=2
+data.exclude$ACROSS.INCLUDE.clinical <- 1
+data.exclude$ACROSS.INCLUDE.clinical[is.na(data.exclude$overall_psychopathology_4factorv2)] <- 0
+clinical.include<-sum(data.exclude$ACROSS.INCLUDE.clinical)
+clinical.exclude<-1396-clinical.include
 
-#Check that number of subjects = 1396
-n_final <- nrow(data.exclude)
+#Exclude those missing clinical data
+subjData <- data.exclude[!is.na(data.exclude$overall_psychopathology_4factorv2),]
+
+#Check that number of subjects = 1394
+n_final <- nrow(subjData)
+
+##Count the number taking psychotropic psychiatric medications
+#Included: n=1239; Excluded for meds: n=155
+subjData$ACROSS.INCLUDE.psychMeds <- 1
+subjData$ACROSS.INCLUDE.psychMeds[subjData$psychoactiveMedPsychv2==1] <- 0
+psychMeds.include<-sum(subjData$ACROSS.INCLUDE.psychMeds)
+psychMeds.exclude<-1394-psychMeds.include
+
 
 ##################################################
 ### DEFINE PSYCHOPATHOLOGY SCREENING DIAGNOSES ###
 ##################################################
 
-##Make variables where 1 = diagnosis.
-subjData <- data.exclude
+##Make variables where 1 = diagnosis
 
 #ADHD
 subjData$Add <- NA
@@ -295,7 +491,6 @@ subjData$totDx <- rowSums(dxDf[,2:17], na.rm=TRUE) #This is how many people have
 subjData$Td <- 0
 subjData$Td[which(subjData$totDx==0)] <- 1
 
-
 #####################################
 #### MAKE TD THE REFERENCE GROUP ####
 #####################################
@@ -317,23 +512,47 @@ subjData$Sep[which(subjData$Td==1)] <- 0
 subjData$Soc[which(subjData$Td==1)] <- 0
 subjData$Sph[which(subjData$Td==1)] <- 0
 
+#######################################################
+### CREATE SUMMARY DIAGNOSTIC VARIABLES FOR FIGURES ###
+#######################################################
+
+#Anxious-misery disorders
+subjData$GadMddOcd <- NA
+subjData$GadMddOcd[which(subjData$Gad==1 | subjData$Mdd==1 | subjData$Ocd==1)] <- 1
+subjData$GadMddOcd[which(subjData$Td==1)] <- 0
+
+#Psychotic disorders
+subjData$Psychosis <- subjData$Ps
+
+#Behavioral disorders
+subjData$AddConOdd <- NA
+subjData$AddConOdd[which(subjData$Add==1 | subjData$Con==1 | subjData$Odd==1)] <- 1
+subjData$AddConOdd[which(subjData$Td==1)] <- 0
+
+#Fear disorders
+subjData$AgrPtdSepSocSph <- NA
+subjData$AgrPtdSepSocSph[which(subjData$Agr==1 | subjData$Ptd==1 | subjData$Sep==1 |subjData$Soc==1 | subjData$Sph==1)] <- 1
+subjData$AgrPtdSepSocSph[which(subjData$Td==1)] <- 0
+
+#All disorders
+subjData$AllDiag <- 1
+subjData$AllDiag[which(subjData$Td==1)] <- 0
 
 #################
 ### SAVE DATA ###
 #################
 
-saveRDS(subjData,"/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
-
+saveRDS(subjData,"/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 ############################
 ### SENSITIVITY ANALYSES ###
 ############################
 
-#Exclude those who were on psychiatric medications (excluded n=156)
+#Exclude those who were on psychiatric medications (excluded n=155)
 data.sensitivity <- subjData[which(subjData$ACROSS.INCLUDE.psychMeds==1),]
 
-#Total sample size after excluding those on psychiatric meds (n=1240)
+#Total sample size after excluding those on psychiatric meds (n=1239)
 n_NoPsychMeds <- nrow(data.sensitivity)
 
 #Save sensitivity dataset
-saveRDS(data.sensitivity,"/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1240_T1_subjData_NoPsychMeds.rds")
+saveRDS(data.sensitivity,"/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1239_T1_subjData_NoPsychMeds.rds")

@@ -3,25 +3,25 @@
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
 
-#Run gam models (GAM without TBV)(spline age term removed)
+#Run gam models (GAM without TBV)
 NmfModels <- lapply(nmfComponents, function(x) {
-  gam(substitute(i ~ sex + averageManualRating + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2 + phobias_4factorv2*sex + phobias_4factorv2*age + sex*age + phobias_4factorv2*sex*age, list(i = as.name(x))), method="REML", data = data.NMF)
+  gam(substitute(i ~ s(age) + sex + averageManualRating + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2 + phobias_4factorv2*sex + phobias_4factorv2*age + sex*age + phobias_4factorv2*sex*age, list(i = as.name(x))), method="REML", data = data.NMF)
 })
 
 #Look at model summaries
 models <- lapply(NmfModels, summary)
 
-######################
-#### sex_age RESULTS ####
-######################
+#############################
+#### INTERACTION RESULTS ####
+#############################
 
 #Pull p-values
 p_sex_age <- sapply(NmfModels, function(v) summary(v)$p.table[13,4])

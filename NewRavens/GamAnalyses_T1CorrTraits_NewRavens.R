@@ -3,28 +3,58 @@
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1239_T1_subjData_NoPsychMeds.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ravens_Nmf18",names(data.NMF))]
 
+#1. Mood: 
 #Run gam models (GAM without TBV)
-NmfModels <- lapply(nmfComponents, function(x) {
-  gam(substitute(i ~ s(age) + sex + averageManualRating + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
+NmfMoodModels <- lapply(nmfComponents, function(x) {
+  gam(substitute(i ~ s(age) + sex + averageManualRating + mood_corrtraitsv2, list(i = as.name(x))), method="REML", data = data.NMF)
 })
 
 #Look at model summaries
-models <- lapply(NmfModels, summary)
+mood_models <- lapply(NmfMoodModels, summary)
+
+#2. Psychosis:
+#Run gam models (GAM without TBV)
+NmfPsyModels <- lapply(nmfComponents, function(x) {
+  gam(substitute(i ~ s(age) + sex + averageManualRating + psychosis_corrtraitsv2, list(i = as.name(x))), method="REML", data = data.NMF)
+})
+
+#Look at model summaries
+psy_models <- lapply(NmfPsyModels, summary)
+
+#3. Externalizing behavior:
+#Run gam models (GAM without TBV)
+NmfExtModels <- lapply(nmfComponents, function(x) {
+  gam(substitute(i ~ s(age) + sex + averageManualRating + externalizing_corrtraitsv2, list(i = as.name(x))), method="REML", data = data.NMF)
+})
+
+#Look at model summaries
+ext_models <- lapply(NmfExtModels, summary)
+
+#4. Phobia (fear):
+#Run gam models (GAM without TBV)
+NmfFearModels <- lapply(nmfComponents, function(x) {
+  gam(substitute(i ~ s(age) + sex + averageManualRating + fear_corrtraitsv2, list(i = as.name(x))), method="REML", data = data.NMF)
+})
+
+#Look at model summaries
+fear_models <- lapply(NmfFearModels, summary)
+
+
 
 ######################
 #### MOOD RESULTS ####
 ######################
 
 #Pull p-values
-p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[4,4])
+p_mood <- sapply(NmfMoodModels, function(v) summary(v)$p.table[4,4])
 
 #Convert to data frame
 p_mood <- as.data.frame(p_mood)
@@ -48,14 +78,15 @@ Nmf_mood_fdr <- row.names(p_mood_fdr)[p_mood_fdr<0.05]
 Nmf_mood_fdr_names <- nmfComponents[as.numeric(Nmf_mood_fdr)]
 
 #To check direction of coefficient estimates
-mood_coeff <- models[as.numeric(Nmf_mood_fdr)]
+mood_coeff <- mood_models[as.numeric(Nmf_mood_fdr)]
+mood_p.table_list <- lapply(mood_coeff,`[[`, 'p.table')
 
-###########################
-#### PSYCHOSIS RESULTS ####
-###########################
+######################
+#### PSY RESULTS ####
+######################
 
 #Pull p-values
-p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[5,4])
+p_psy <- sapply(NmfPsyModels, function(v) summary(v)$p.table[4,4])
 
 #Convert to data frame
 p_psy <- as.data.frame(p_psy)
@@ -79,14 +110,15 @@ Nmf_psy_fdr <- row.names(p_psy_fdr)[p_psy_fdr<0.05]
 Nmf_psy_fdr_names <- nmfComponents[as.numeric(Nmf_psy_fdr)]
 
 #To check direction of coefficient estimates
-psy_coeff <- models[as.numeric(Nmf_psy_fdr)]
+psy_coeff <- psy_models[as.numeric(Nmf_psy_fdr)]
+psy_p.table_list <- lapply(psy_coeff,`[[`, 'p.table')
 
-########################################
-#### EXTERNALIZING BEHAVIOR RESULTS ####
-########################################
+######################
+#### EXT RESULTS ####
+######################
 
 #Pull p-values
-p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
+p_ext <- sapply(NmfExtModels, function(v) summary(v)$p.table[4,4])
 
 #Convert to data frame
 p_ext <- as.data.frame(p_ext)
@@ -110,14 +142,16 @@ Nmf_ext_fdr <- row.names(p_ext_fdr)[p_ext_fdr<0.05]
 Nmf_ext_fdr_names <- nmfComponents[as.numeric(Nmf_ext_fdr)]
 
 #To check direction of coefficient estimates
-ext_coeff <- models[as.numeric(Nmf_ext_fdr)]
+ext_coeff <- ext_models[as.numeric(Nmf_ext_fdr)]
+ext_p.table_list <- lapply(ext_coeff,`[[`, 'p.table')
 
-##############################
-#### PHOBIA(FEAR) RESULTS ####
-##############################
+
+######################
+#### FEAR RESULTS ####
+######################
 
 #Pull p-values
-p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
+p_fear <- sapply(NmfFearModels, function(v) summary(v)$p.table[4,4])
 
 #Convert to data frame
 p_fear <- as.data.frame(p_fear)
@@ -141,36 +175,6 @@ Nmf_fear_fdr <- row.names(p_fear_fdr)[p_fear_fdr<0.05]
 Nmf_fear_fdr_names <- nmfComponents[as.numeric(Nmf_fear_fdr)]
 
 #To check direction of coefficient estimates
-fear_coeff <- models[as.numeric(Nmf_fear_fdr)]
-
-#########################################
-#### OVERALL PSYCHOPATHOLOGY RESULTS ####
-#########################################
-
-#Pull p-values
-p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
-
-#Convert to data frame
-p_overall <- as.data.frame(p_overall)
-
-#Print original p-values to three decimal places
-p_overall_round <- round(p_overall,3)
-
-#FDR correct p-values
-p_overall_fdr <- p.adjust(p_overall[,1],method="fdr")
-
-#Convert to data frame
-p_overall_fdr <- as.data.frame(p_overall_fdr)
-
-#To print fdr-corrected p-values to three decimal places
-p_overall_fdr_round <- round(p_overall_fdr,3)
-
-#List the NMF components that survive FDR correction
-Nmf_overall_fdr <- row.names(p_overall_fdr)[p_overall_fdr<0.05]
-
-#Name of the NMF components that survive FDR correction
-Nmf_overall_fdr_names <- nmfComponents[as.numeric(Nmf_overall_fdr)]
-
-#To check direction of coefficient estimates
-overall_coeff <- models[as.numeric(Nmf_overall_fdr)]
+fear_coeff <- fear_models[as.numeric(Nmf_fear_fdr)]
+fear_p.table_list <- lapply(fear_coeff,`[[`, 'p.table')
 

@@ -1,10 +1,10 @@
 #Define paths
-subjDataName<-"/data/joy/BBL/projects/pncT1AcrossDisorder/subjectData/n1360_JLF_volCtGmd_subjData.rds"
-outPdf_frontal<-'/data/joy/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_frontalCT.pdf'
-outPdf_occipit<-'/data/joy/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_occipitCT.pdf'
-outPdf_parietal<-'/data/joy/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_parietalCT.pdf'
-outPdf_temporal<-'/data/joy/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_temporalCT.pdf'
-outPdf_totalGrey<-'/data/joy/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_totalGreyCT.pdf'
+subjDataName<-"/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/Old/Oldest/Older/n1360_JLF_volCtGmd_subjData.rds"
+outPdf_frontal<-'/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_frontalCT.pdf'
+outPdf_occipit<-'/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_occipitCT.pdf'
+outPdf_parietal<-'/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_parietalCT.pdf'
+outPdf_temporal<-'/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_temporalCT.pdf'
+outPdf_totalGrey<-'/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure3_totalGreyCT.pdf'
 
 #Load libraries
 library(visreg)
@@ -12,6 +12,9 @@ library(reshape2)
 
 #Load and subset subject data
 subjData<-readRDS(subjDataName)
+
+#Remove NAs
+subjData <- subjData[!is.na(subjData$goassessItemBifactor4FactorOverallPsy),]
 
 #Get reduced datframe for melt
 subjData_frontal<-subjData[,c("bblid","age","sex","ageSq","mprage_antsCT_vol_TBV","CT_gmFrontalTotal","goassessItemBifactor4FactorMood","goassessItemBifactor4FactorPsych","goassessItemBifactor4FactorExt","goassessItemBifactor4FactorPhb","goassessItemBifactor4FactorOverallPsy")]
@@ -34,11 +37,11 @@ dataLong_totalGrey<-melt(subjData_totalGrey,id.vars=c("bblid","age","sex","ageSq
 
 
 #Run models
-mdl_frontal<-lm(CT_gmFrontalTotal ~ age + sex + I(scale(age, scale=FALSE, center=TRUE)^2) + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_frontal)
-mdl_occipit<-lm(CT_gmOccipitalTotal ~ age + sex + I(scale(age, scale=FALSE, center=TRUE)^2) + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_occipit)
-mdl_parietal<-lm(CT_gmParietalTotal ~ age + sex + I(scale(age, scale=FALSE, center=TRUE)^2) + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_parietal)
-mdl_temporal<-lm(CT_gmTemporalTotal ~ age + sex + I(scale(age, scale=FALSE, center=TRUE)^2) + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_temporal)
-mdl_totalGrey<-lm(CT_gmTotal ~ age + sex + I(scale(age, scale=FALSE, center=TRUE)^2) + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_totalGrey)
+mdl_frontal<-lm(CT_gmFrontalTotal ~ age + sex + ageSq + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_frontal)
+mdl_occipit<-lm(CT_gmOccipitalTotal ~ age + sex + ageSq + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_occipit)
+mdl_parietal<-lm(CT_gmParietalTotal ~ age + sex + ageSq + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_parietal)
+mdl_temporal<-lm(CT_gmTemporalTotal ~ age + sex + ageSq + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_temporal)
+mdl_totalGrey<-lm(CT_gmTotal ~ age + sex + ageSq + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_totalGrey)
 
 #Define figure colors
 #Colors	used: #325194 = blue (Anxious-Misery), #943282 = purple (Psychosis), #B3141C = red (Behavioral), #F58311 = orange (Fear), #329444 = green (OverallPsych))
@@ -57,6 +60,15 @@ pdf(outPdf_frontal)
 par(mgp=c(2.5,.65,0), lwd=2, lend=2, cex.lab=1.5, cex.axis=1.25, mar=c(4,4,1,.7), oma=c(0,0,2,0), bty="l")
 visreg(mdl_frontal,"symptomScore",by="symptomDomain",partial=FALSE,rug=FALSE,overlay=TRUE,band=FALSE,line.par=list(col=colors),fill.par=list(col="#80808050"), xlab="Symptom Score (z)", ylab="Frontal Lobe Cortical Thickness",legend=FALSE)
 dev.off()
+
+mdl_frontal<-lm(CT_gmFrontalTotal ~ age + sex + mprage_antsCT_vol_TBV + symptomDomain*symptomScore, data=dataLong_frontal)
+pdf(outPdf_frontal)
+visreg(mdl_frontal)
+dev.off()
+
+
+#visreg(mdl_frontal,"symptomScore",by="symptomDomain",partial=FALSE,rug=FALSE,overlay=TRUE,band=FALSE,line.par=list(col=colors),fill.par=list(col="#80808050"), xlab="Symptom S#core (z)", ylab="Frontal Lobe Cortical Thickness",legend=FALSE)
+
 
 pdf(outPdf_occipit)
 par(mgp=c(2.5,.65,0), lwd=2, lend=2, cex.lab=1.5, cex.axis=1.25, mar=c(4,4,1,.7), oma=c(0,0,2,0), bty="l")

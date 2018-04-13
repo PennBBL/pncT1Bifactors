@@ -6,7 +6,7 @@
 ### Load data and libraries ###
 ###############################
 
-subjData <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+subjData <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load libraries
 library(plyr)
@@ -97,5 +97,15 @@ Soc_total <-sum(subjData$Soc,na.rm=TRUE)
 Sph_total <-sum(subjData$Sph,na.rm=TRUE)
 
 
+#########################################
+#### Percentages on psychiatric meds ####
+#########################################
 
-
+antiPsy <- mean(subjData$medclass_Antipsychotic)
+antiCon <- mean(subjData$medclass_Anticonvulsant)
+antiDep <- mean(subjData$medclass_Antidepressant)
+benzo <- mean(subjData$medclass_Benzodiazepine)
+stim <- mean(subjData$medclass_Stimulant)
+nonStimADHD <- mean(subjData$medclass_NonstimulantADHDmed)
+Lithium <- mean(subjData$medclass_Lithium)
+Other <- mean(subjData$medclass_Other)

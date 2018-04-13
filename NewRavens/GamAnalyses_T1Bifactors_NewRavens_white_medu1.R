@@ -1,19 +1,19 @@
 ##########################################
-#### GAM MODELS FOR T1 BIFACTOR STUDY ####
+#### GAM MODELS FOR T1 Bifactor STUDY ####
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1239_T1_subjData_NoPsychMeds.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ravens_Nmf18",names(data.NMF))]
 
 #Run gam models (GAM without TBV)
 NmfModels <- lapply(nmfComponents, function(x) {
-  gam(substitute(i ~ s(age) + sex + averageManualRating + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
+  gam(substitute(i ~ s(age) + sex + averageManualRating + white + medu1 + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
 })
 
 #Look at model summaries
@@ -24,7 +24,7 @@ models <- lapply(NmfModels, summary)
 ######################
 
 #Pull p-values
-p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[4,4])
+p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
 
 #Convert to data frame
 p_mood <- as.data.frame(p_mood)
@@ -55,7 +55,7 @@ mood_coeff <- models[as.numeric(Nmf_mood_fdr)]
 ###########################
 
 #Pull p-values
-p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[5,4])
+p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
 
 #Convert to data frame
 p_psy <- as.data.frame(p_psy)
@@ -86,7 +86,7 @@ psy_coeff <- models[as.numeric(Nmf_psy_fdr)]
 ########################################
 
 #Pull p-values
-p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
+p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
 
 #Convert to data frame
 p_ext <- as.data.frame(p_ext)
@@ -117,7 +117,7 @@ ext_coeff <- models[as.numeric(Nmf_ext_fdr)]
 ##############################
 
 #Pull p-values
-p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
+p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[9,4])
 
 #Convert to data frame
 p_fear <- as.data.frame(p_fear)
@@ -148,7 +148,7 @@ fear_coeff <- models[as.numeric(Nmf_fear_fdr)]
 #########################################
 
 #Pull p-values
-p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
+p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[10,4])
 
 #Convert to data frame
 p_overall <- as.data.frame(p_overall)
@@ -173,4 +173,3 @@ Nmf_overall_fdr_names <- nmfComponents[as.numeric(Nmf_overall_fdr)]
 
 #To check direction of coefficient estimates
 overall_coeff <- models[as.numeric(Nmf_overall_fdr)]
-
