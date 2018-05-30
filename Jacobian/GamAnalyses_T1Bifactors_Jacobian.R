@@ -3,7 +3,7 @@
 ##########################################
 
 #Load data
-data.JAC <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData_Jacobian.rds")
+data.JAC <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData_Jacobian.rds")
 
 #Load library
 library(mgcv)

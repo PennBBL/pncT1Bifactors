@@ -3,13 +3,13 @@
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
 
 #Get NMF variable names
-nmfComponents <- names(data.NMF)[grep("Nmf18",names(data.NMF))]
+nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
 
 #Run gam models (GAM without TBV)
 NmfModels <- lapply(nmfComponents, function(x) {

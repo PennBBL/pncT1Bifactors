@@ -4,7 +4,7 @@
 
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #install packages 
 #install.packages("CCA")
@@ -16,7 +16,7 @@ library(GGally)
 library(CCA)
 
 #Get NMF variable data {LOOK AT JLF SCRIPT FOR HOW TO PULL DATA NOT NAMES}
-nmfComponents <- data.NMF[grep("Nmf18",names(data.NMF))]
+nmfComponents <- data.NMF[grep("Ct_Nmf18",names(data.NMF))]
 
 #Get Bifactor data
 corrtraits <- data.NMF[grep("corrtraitsv2",names(data.NMF))]

@@ -3,7 +3,7 @@
 ##########################################
 
 #Load data
-data.JLF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1396_T1_subjData.rds")
+data.JLF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
 
 #Load library
 library(mgcv)
@@ -174,3 +174,24 @@ Jlf_overall_fdr_names <- jlfComponents[as.numeric(Jlf_overall_fdr)]
 
 #To check direction of coefficient estimates
 overall_coeff <- models[as.numeric(Jlf_overall_fdr)]
+
+#######################
+#### PULL T VALUES ####
+#######################
+
+#Pull t-values for fear
+tJLF <- sapply(JlfModels, function(x) summary(x)$p.table[6,3])
+
+#Print to two decimal places
+tJLF_round <- round(tJLF,2)[pJLF_fdr<0.05]
+
+#Convert to data frame
+t <- as.data.frame(tJLF_round)
+
+#Combine ROI names, p values, and t values into one dataframe
+combined <- cbind(ROI,p)
+combined2 <- cbind(combined,t)
+
+#Save as a .csv
+write.csv(combined2, file="/data/jux/BBL/projects/pncPreterm/subjectData/pncPreterm_JLF_ROIs.csv", row.names=F, quote=F)
+

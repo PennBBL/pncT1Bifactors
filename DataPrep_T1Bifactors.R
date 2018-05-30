@@ -186,125 +186,6 @@ data.volLobes$mprage_jlf_vol_Parietal_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L
 data.volLobes$mprage_jlf_vol_Occipital_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Occipital_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Occipital_Lobe_WM)/1000
 data.volLobes$mprage_jlf_vol_Temporal_Lobe_WM <- (data.volLobes$mprage_jlf_vol_L_Temporal_Lobe_WM + data.volLobes$mprage_jlf_vol_R_Temporal_Lobe_WM)/1000
 
-######################################################################################################
-###VOLUME###
-
-#NOTE: total volumes per tissue class (GM, Wm, and CBF) already exist as variables in the "n1601_ctVol20170412.csv" data file and do not need to be recreated.
-#But total GM does not exist in the CT or GMD files and needs to be made.
-
-#ALL ROIS
-#dataVol <- data.vol[,grep("mprage_jlf_vol",names(data.vol))]
-
-#GM: these are the gray matter regions (112 regions) 
-#dataVolGm <- dataVol[,-grep("Vent|Brain_Stem|Cerebell|Cerebral_White_Matter|CSF|Lobe_WM",names(dataVol))]
-
-#Get total GM volume
-#dataVolGm <- data.matrix(dataVolGm)
-#data.vol$mprage_antsCT_vol_GrayMatter2 <- rowSums(dataVolGm)
-
-#WM: these are the white matter regions (4 regions)
-#dataVolWm <- dataVol[,(unique(c( grep("White_Matter",names(dataVol)) )))]
-
-#Get total WM volume
-#dataVolWm <- data.matrix(dataVolWm)
-#data.vol$mprage_antsCT_vol_WhiteMatter2 <- rowSums(dataVolWm)
-
-#CSF: CSF and ventricles (7 regions)
-#dataVolCsf <- dataVol[,c(grep("CSF",names(dataVol)),grep("Vent",names(dataVol)))]
-
-#Get total CSF
-#dataVolCsf <- data.matrix(dataVolCsf)
-#data.vol$mprage_antsCT_vol_CSF2 <- rowSums(dataVolCsf)
-
-###CORTICAL THICKNESS###
-
-#GM: all of the JLF CT variables are GM regions; WM and CSF don't make sense for CT
-#dataCTGm <- data.ct[,grep("mprage_jlf_ct",names(data.ct))]
-
-#Get total GM volume
-#dataCTGm <- data.matrix(dataCTGm)
-#data.ct$mprage_antsCT_ct_GrayMatter <- rowSums(dataCTGm)
-
-##############################
-### SEPARATE GM INTO LOBES ###
-##############################
-
-###VOLUME###
-
-#subcortical (14 regions)
-#dataVolSubcort <- dataVol[,c(grep("Accumbens",names(dataVol)), grep("Amygdala",names(dataVol)), grep("Caudate",names(dataVol)), grep("Hippocampus",names(dataVol)),
-#        grep("Pallidum",names(dataVol)), grep("Putamen",names(dataVol)), grep("Thalamus",names(dataVol)))]
-
-#frontal (50 regions)
-#dataVolFrontal <- dataVol[,unique(c(grep("OrG",names(dataVol)), grep("ins",names(dataVol)), grep("FRP",names(dataVol)), grep("FG",names(dataVol)),
-#        grep("PrG",names(dataVol)), grep("Gre",names(dataVol)), grep("MFC",names(dataVol)), grep("SCA",names(dataVol)), grep("SMC",names(dataVol)),
-#        grep("FRP",names(dataVol)),grep("CO",names(dataVol)), grep("FO",names(dataVol)), grep("PO",names(dataVol)), grep("CgG",names(dataVol))))]
-
-
-
-#occipital (16 regions)
-#dataVolOccipital <- dataVol[,unique(c(grep("OG",names(dataVol)), grep("OFuG",names(dataVol)), grep("OCP",names(dataVol)), grep("SOG",names(dataVol)),
-#        grep("Calc",names(dataVol)), grep("Cun",names(dataVol)), grep("LiG",names(dataVol))))]
-
-#parietal (12 regions)
-#dataVolParietal <- dataVol[,unique(c(grep("AnG",names(dataVol)), grep("PoG",names(dataVol)), grep("SMG",names(dataVol)), grep("SPL",names(dataVol)),
-#        grep("Pcu",names(dataVol))))]
-
-#temporal (20 regions)
-#dataVolTemporal <- dataVol[,unique(c(grep("_FuG",names(dataVol)), grep("TG",names(dataVol)), grep("TMP",names(dataVol)), grep("PP",names(dataVol)),
-#        grep("PT",names(dataVol)), grep("PHG",names(dataVol)),grep("Ent",names(dataVol))))]
-
-#get total volume for GM lobes (Divide by 1000 to change the units from cubic millimeters to cubic centimeters (cc); 1 cc = 1,000 mm3)
-#dataVolCereb <- data.matrix(dataVolCereb)
-#subjData$Vol_gmCerebTotal <- rowSums(dataVolCereb)/1000
-#dataVolSubcort <- data.matrix(dataVolSubcort)
-#subjData$Vol_gmSubcortTotal <- rowSums(dataVolSubcort)/1000
-#dataVolFrontal <- data.matrix(dataVolFrontal)
-#subjData$Vol_gmFrontalTotal <- rowSums(dataVolFrontal)/1000
-#dataVolOccipital <- data.matrix(dataVolOccipital)
-#subjData$Vol_gmOccipitalTotal <- rowSums(dataVolOccipital)/1000
-#dataVolParietal <- data.matrix(dataVolParietal)
-#subjData$Vol_gmParietalTotal <- rowSums(dataVolParietal)/1000
-#dataVolTemporal <- data.matrix(dataVolTemporal)
-#subjData$Vol_gmTemporalTotal <- rowSums(dataVolTemporal)/1000
-
-#Change units for total GM/WM/CSF volumes to cc's
-#subjData$mprage_antsCT_vol_GrayMatter <- subjData$mprage_antsCT_vol_GrayMatter/1000
-#subjData$mprage_antsCT_vol_WhiteMatter <- subjData$mprage_antsCT_vol_WhiteMatter/1000
-#subjData$mprage_antsCT_vol_CSF <- subjData$mprage_antsCT_vol_CSF/1000
-
-
-###CORTICAL THICKNESS###
-
-#cerebellum and subcortical don't apply to JLF CT data.
-
-#frontal (50 regions)
-#dataCTFrontal <- dataCT[,unique(c(grep("OrG",names(dataCT)), grep("ins",names(dataCT)), grep("FRP",names(dataCT)), grep("FG",names(dataCT)),
-#        grep("PrG",names(dataCT)), grep("Gre",names(dataCT)), grep("MFC",names(dataCT)), grep("SCA",names(dataCT)), grep("SMC",names(dataCT)),
-#        grep("FRP",names(dataCT)),grep("CO",names(dataCT)), grep("FO",names(dataCT)), grep("PO",names(dataCT)), grep("CgG",names(dataCT))))]
-
-#occipital (16 regions)
-#dataCTOccipital <- dataCT[,unique(c(grep("OG",names(dataCT)), grep("OFuG",names(dataCT)), grep("OCP",names(dataCT)), grep("SOG",names(dataCT)),
-#        grep("Calc",names(dataCT)), grep("Cun",names(dataCT)), grep("LiG",names(dataCT))))]
-
-#parietal (12 regions)
-#dataCTParietal <- dataCT[,unique(c(grep("AnG",names(dataCT)), grep("PoG",names(dataCT)), grep("SMG",names(dataCT)), grep("SPL",names(dataCT)),
-#        grep("Pcu",names(dataCT))))]
-
-#temporal (20 regions)
-#dataCTTemporal <- dataCT[,unique(c(grep("_FuG",names(dataCT)), grep("TG",names(dataCT)), grep("TMP",names(dataCT)), grep("PP",names(dataCT)),
-#        grep("PT",names(dataCT)), grep("PHG",names(dataCT)),grep("Ent",names(dataCT))))]
-
-#get total volume for GM subdivisions
-#dataCTFrontal <- data.matrix(dataCTFrontal)
-#subjData$CT_gmFrontalTotal <- rowSums(dataCTFrontal)
-#dataCTOccipital <- data.matrix(dataCTOccipital)
-#subjData$CT_gmOccipitalTotal <- rowSums(dataCTOccipital)
-#dataCTParietal <- data.matrix(dataCTParietal)
-#subjData$CT_gmParietalTotal <- rowSums(dataCTParietal)
-#dataCTTemporal <- data.matrix(dataCTTemporal)
-#subjData$CT_gmTemporalTotal <- rowSums(dataCTTemporal)
-
 ##################
 ### MERGE DATA ###
 ##################
@@ -346,7 +227,7 @@ data.n1601 <- dataMerge31[match(data.t1QA$bblid, dataMerge31$bblid, nomatch=0),]
 #Put bblids in ascending order
 data.ordered <- data.n1601[order(data.n1601$bblid),]
 
-#Count the number of subjects (should be 1601) (After run script, type n on R command line to see the number of subjects you have. If not 1601, MAJOR PROBLEM)
+#Count the number of subjects (should be 1601)
 n <- nrow(data.ordered)
 
 ########################
