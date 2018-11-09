@@ -3,7 +3,7 @@
 ##########################################
 
 #Load data
-data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1394_T1_subjData.rds")
+data.NMF <- readRDS("/data/jux/BBL/projects/pncT1AcrossDisorder/subjectData/n1239_T1_subjData_NoPsychMeds.rds")
 
 #Load library
 library(mgcv)
@@ -13,125 +13,18 @@ nmfComponents <- names(data.NMF)[grep("Ct_Nmf18",names(data.NMF))]
 
 #Run gam models (GAM without TBV)
 NmfModels <- lapply(nmfComponents, function(x) {
-  gam(substitute(i ~ s(age) + sex + averageManualRating + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
+  gam(substitute(i ~ s(age) + sex + averageManualRating + white + medu1 + mprage_antsCT_vol_TBV + mood_4factorv2 + psychosis_4factorv2 + externalizing_4factorv2 + phobias_4factorv2 + overall_psychopathology_4factorv2, list(i = as.name(x))), method="REML", data = data.NMF)
 })
 
 #Look at model summaries
 models <- lapply(NmfModels, summary)
-
-#Look at coefficients for CT_fear
-mood_coeffs <- sapply(NmfModels, function(v) summary(v)$p.table[4,])
-psy_coeffs <- sapply(NmfModels, function(v) summary(v)$p.table[5,])
-ext_coeffs <- sapply(NmfModels, function(v) summary(v)$p.table[6,])
-fear_coeffs <- sapply(NmfModels, function(v) summary(v)$p.table[7,])
-overall_coeffs <- sapply(NmfModels, function(v) summary(v)$p.table[8,])
-
-#################################################
-#### Pulling out values for the result table ####
-#################################################
-
-#Pull B(coeff) for CT_mood
-B_mood <- as.data.frame(mood_coeffs[1,])
-
-#Print original p-values to two decimal places
-B_mood_round <- round(B_mood,2)
-
-#Convert to data frame
-SE_mood <- as.data.frame(mood_coeffs[2,])
-
-#Print original p-values to two decimal places
-SE_mood_round <- round(SE_mood,2)
-
-#Pull t-values for CT_mood
-t_mood <- as.data.frame(mood_coeffs[3,])
-
-#Print original p-values to two decimal places
-t_mood_round <- round(t_mood,2)
-
-
-#Pull B(coeff) for CT_psy
-B_psy <- as.data.frame(psy_coeffs[1,])
-
-#Print original p-values to two decimal places
-B_psy_round <- round(B_psy,2)
-
-#Convert to data frame
-SE_psy <- as.data.frame(psy_coeffs[2,])
-
-#Print original p-values to two decimal places
-SE_psy_round <- round(SE_psy,2)
-
-#Pull t-values for CT_psy
-t_psy <- as.data.frame(psy_coeffs[3,])
-
-#Print original p-values to two decimal places
-t_psy_round <- round(t_psy,2)
-
-
-#Pull B(coeff) for CT_ext
-B_ext <- as.data.frame(ext_coeffs[1,])
-
-#Print original p-values to two decimal places
-B_ext_round <- round(B_ext,2)
-
-#Convert to data frame
-SE_ext <- as.data.frame(ext_coeffs[2,])
-
-#Print original p-values to two decimal places
-SE_ext_round <- round(SE_ext,2)
-
-#Pull t-values for CT_ext
-t_ext <- as.data.frame(ext_coeffs[3,])
-
-#Print original p-values to two decimal places
-t_ext_round <- round(t_ext,2)
-
-
-#Pull B(coeff) for CT_fear
-B_fear <- as.data.frame(fear_coeffs[1,])
-
-#Print original p-values to two decimal places
-B_fear_round <- round(B_fear,2)
-
-#Convert to data frame
-SE_fear <- as.data.frame(fear_coeffs[2,])
-
-#Print original p-values to two decimal places
-SE_fear_round <- round(SE_fear,2)
-
-#Pull t-values for CT_fear
-t_fear <- as.data.frame(fear_coeffs[3,])
-
-#Print original p-values to two decimal places
-t_fear_round <- round(t_fear,2)
-
-
-#Pull B(coeff) for CT_overall
-B_overall <- as.data.frame(overall_coeffs[1,])
-
-#Print original p-values to two decimal places
-B_overall_round <- round(B_overall,2)
-
-#Convert to data frame
-SE_overall <- as.data.frame(overall_coeffs[2,])
-
-#Print original p-values to two decimal places
-SE_overall_round <- round(SE_overall,2)
-
-#Pull t-values for CT_overall
-t_overall <- as.data.frame(overall_coeffs[3,])
-
-#Print original p-values to two decimal places
-t_overall_round <- round(t_overall,2)
-
-
 
 ######################
 #### MOOD RESULTS ####
 ######################
 
 #Pull p-values
-p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[4,4])
+p_mood <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
 
 #Convert to data frame
 p_mood <- as.data.frame(p_mood)
@@ -162,7 +55,7 @@ mood_coeff <- models[as.numeric(Nmf_mood_fdr)]
 ###########################
 
 #Pull p-values
-p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[5,4])
+p_psy <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
 
 #Convert to data frame
 p_psy <- as.data.frame(p_psy)
@@ -193,7 +86,7 @@ psy_coeff <- models[as.numeric(Nmf_psy_fdr)]
 ########################################
 
 #Pull p-values
-p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[6,4])
+p_ext <- sapply(NmfModels, function(v) summary(v)$p.table[9,4])
 
 #Convert to data frame
 p_ext <- as.data.frame(p_ext)
@@ -224,7 +117,7 @@ ext_coeff <- models[as.numeric(Nmf_ext_fdr)]
 ##############################
 
 #Pull p-values
-p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[7,4])
+p_fear <- sapply(NmfModels, function(v) summary(v)$p.table[10,4])
 
 #Convert to data frame
 p_fear <- as.data.frame(p_fear)
@@ -255,7 +148,7 @@ fear_coeff <- models[as.numeric(Nmf_fear_fdr)]
 #########################################
 
 #Pull p-values
-p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[8,4])
+p_overall <- sapply(NmfModels, function(v) summary(v)$p.table[11,4])
 
 #Convert to data frame
 p_overall <- as.data.frame(p_overall)

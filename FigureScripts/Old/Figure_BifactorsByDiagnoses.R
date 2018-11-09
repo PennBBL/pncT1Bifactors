@@ -94,7 +94,7 @@ Figure<-ggplot(facTblLong, aes(x=group, y=meanScore,fill=factor)) +
 	theme(axis.text.x = element_text(size = 55, colour="black", face="bold")) +
         theme(axis.text.y = element_text(size = 45, colour="black")) + guides(fill=guide_legend(title=NULL)) +
         scale_x_discrete(breaks=c("aGadMdd","bPsychosis","cAddConOdd","dAgrPtdSepSocSph","Td"), 
-	labels=addline_format(c("GAD (n=27)&Depress (n=193)","Psych (n=399)","ODD (n=458)&ADHD (n=230)&Con (n=121)","PTSD (n=172)&Agora (n=81)&Soc Anx (n=328)&Spec Ph (n=426)&Sep Anx (n=63)","TD (n=428)"))) +
+	labels=addline_format(c("GAD&Depression","Psychosis","ODD&ADHD&Conduct","PTSD&Agoraphobia&Social Anx&Specific Ph&Separation Anx","TD"))) +
 	theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) +
         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line.x = element_line(colour = "black"),
         axis.line.y = element_line(colour = "black"))
@@ -102,7 +102,7 @@ Figure<-ggplot(facTblLong, aes(x=group, y=meanScore,fill=factor)) +
 #see colors used in plot (leave "data" specified as is)
 Plot1<-ggplot_build(Figure)$data
 
-ggsave(file="/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure_BifactorsByDiag.png", width = 35, height = 20, units = "in", dpi = 300)
+ggsave(file="/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure_BifactorsByDiag.png", width = 30, height = 20, units = "in", dpi = 300)
 
 
 ##helpful ggplot guides:

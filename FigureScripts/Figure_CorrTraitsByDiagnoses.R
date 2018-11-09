@@ -26,12 +26,12 @@ dxNamesShort<-c("AnxiousMiseryDisorders","PsychoticDisorders","BehavioralDisorde
 row.names(facTbl)<-dxNamesShort
 
 #rename diagnostic variables so the will be graphed in the correct order
-subjData$aGadMddOcd <- subjData$GadMddOcd
+subjData$aGadMdd <- subjData$GadMdd
 subjData$bPsychosis <- subjData$Psychosis
 subjData$cAddConOdd <- subjData$AddConOdd
 subjData$dAgrPtdSepSocSph <- subjData$AgrPtdSepSocSph
 
-dxs<-c("aGadMddOcd","bPsychosis","cAddConOdd","dAgrPtdSepSocSph","Td")
+dxs<-c("aGadMdd","bPsychosis","cAddConOdd","dAgrPtdSepSocSph","Td")
 
 #Calculate means and standard deviations
 for (i in 1:5){
@@ -84,12 +84,12 @@ Figure<-ggplot(facTblLong, aes(x=group, y=meanScore,fill=factor)) +
         geom_bar(stat="identity",position=position_dodge()) +
         scale_fill_manual(values=c("#325194","#943282","#B3141C","#F58311"), breaks=c("MoodMean","PsychosisMean","ExternalizingMean","PhobiasMean"),
         labels=c("Anxious-Misery", "Psychosis", "Behavioral", "Fear")) +
-        theme(axis.title.y = element_text(size = 45, angle = 90, face="bold")) + 
-	theme(legend.text = element_text(size = 30), legend.justification=c(0.5,0.5), legend.position=c(.9,.9), legend.key.size=unit(3,"line")) + 
-	theme(axis.text.x = element_text(size = 30, colour="black", face="bold")) +
-        theme(axis.text.y = element_text(size = 30, colour="black")) + guides(fill=guide_legend(title=NULL)) +
-        scale_x_discrete(breaks=c("aGadMddOcd","bPsychosis","cAddConOdd","dAgrPtdSepSocSph","Td"), 
-	labels=addline_format(c("GAD&OCD&Depression","Psychosis","ODD&ADHD&Conduct Disorder","PTSD&Agoraphobia&Social Anxiety&Specific Phobias&Separation Anxiety","Typically Developing"))) +
+        theme(axis.title.y = element_text(size = 60, angle = 90, face="bold")) + 
+	theme(legend.text = element_text(size = 45), legend.justification=c(0.5,0.5), legend.position=c(.85,.9), legend.key.size=unit(3,"line")) + 
+	theme(axis.text.x = element_text(size = 55, colour="black", face="bold")) +
+        theme(axis.text.y = element_text(size = 45, colour="black")) + guides(fill=guide_legend(title=NULL)) +
+        scale_x_discrete(breaks=c("aGadMdd","bPsychosis","cAddConOdd","dAgrPtdSepSocSph","Td"), 
+	labels=addline_format(c("GAD (n=27)&Depress (n=193)","Psych (n=399)","ODD (n=458)&ADHD (n=230)&Con (n=121)","PTSD (n=172)&Agora (n=81)&Soc Anx (n=328)&Spec Ph (n=426)&Sep Anx (n=63)","TD (n=428)"))) +
 	theme(plot.margin = unit(c(1,2.5,1,0.5), "cm")) +
         theme(panel.grid.major = element_blank(), panel.grid.minor = element_blank(), panel.background = element_blank(), axis.line.x = element_line(colour = "black"),
         axis.line.y = element_line(colour = "black"))
@@ -97,7 +97,7 @@ Figure<-ggplot(facTblLong, aes(x=group, y=meanScore,fill=factor)) +
 #see colors used in plot (leave "data" specified as is)
 Plot1<-ggplot_build(Figure)$data
 
-ggsave(file="/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure_CorrTraitsByDiag.png", width = 30, height = 15, units = "in", dpi = 300)
+ggsave(file="/data/jux/BBL/projects/pncT1AcrossDisorder/TablesFigures/Figure_CorrTraitsByDiag.png", width = 35, height = 20, units = "in", dpi = 300)
 
 
 ##helpful ggplot guides:
